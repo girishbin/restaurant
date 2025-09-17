@@ -1,26 +1,21 @@
-<script lang="ts">
-    import '../../app.css';
-    import { Button } from "$lib/components/ui/button/index.js";
+<script>
+	import '../../app.css';
+	import { Button } from '$lib/components/ui/button/index.js';
+	import { page } from '$app/state';
 
+	let { children, data } = $props();
 
-	let { children } = $props();
-    
-    let bookmarks = $state(false);
-    let fullUrls = $state(true);
-    let profileRadioValue = $state("benoit");
-   </script>
-    
-   
+	const { categories } = data;
+	const selectedCategory = $derived(page.url.searchParams.get('category'));
+</script>
 
-   <Button> The Hunger Blocks </Button>
-   <Button> Parazzas</Button>
-   <Button> Raitas & others </Button>
-   <Button> Parazza Seasoning & Sides </Button>
-   <Button> Rice Bowls  </Button>
-   <Button> Chai & Chomp </Button>
-   <Button>Rolls </Button>
-   <Button> Fresh-Warm Bread Treats </Button>
-   <Button> Drinks</Button>
-   <Button> Desserts </Button>
+<div class="flex flex-wrap gap-2 p-4">
+	<Button as="a" href="/bill" variant={!selectedCategory ? 'default' : 'outline'}> All </Button>
+	{#each categories as category}
+		<Button as="a" href={`/bill?category=${category}`} variant={selectedCategory === category ? 'default' : 'outline'}>
+			{category}
+		</Button>
+	{/each}
+</div>
 
-   {@render children()}
+{@render children()}

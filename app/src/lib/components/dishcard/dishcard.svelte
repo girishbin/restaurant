@@ -6,7 +6,7 @@
       id: 1,
       name: 'Sample Dish',
       price: 12.99,
-      image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
+      imageUrl: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
       description: 'Delicious sample dish'
     };
     export let quantity = 0;
@@ -45,12 +45,18 @@
   <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200">
     <!-- Image Section -->
     <div class="relative h-48 overflow-hidden">
-      <img 
-        src={item.image} 
-        alt={item.name}
-        class="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
-        loading="lazy"
-      />
+      {#if item.imageUrl}
+        <img
+          src={item.imageUrl}
+          alt={item.name}
+          class="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
+          loading="lazy"
+        />
+      {:else}
+        <div class="flex h-full w-full items-center justify-center bg-gray-200">
+          <span class="text-gray-500">No Image</span>
+        </div>
+      {/if}
       {#if isInCart}
         <div class="absolute top-2 right-2 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-medium">
           In Cart

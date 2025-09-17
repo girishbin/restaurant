@@ -8,6 +8,7 @@ export const menuItems = pgTable('menu_items', {
   description: text('description'),
   price: decimal('price', { precision: 10, scale: 2 }).notNull(),
   category: varchar('category', { length: 50 }), // e.g., 'food', 'beverage', 'dessert'
+  imageUrl: varchar('image_url', { length: 255 }),
   isActive: integer('is_active').default(1), // 1 for active, 0 for inactive
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow()
