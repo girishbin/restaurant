@@ -1,46 +1,32 @@
 <script>
-    import { createEventDispatcher } from 'svelte';
-    
-    // Props
-    export let item = {
-      id: 1,
-      name: 'Sample Dish',
-      price: 12.99,
-      imageUrl: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
-      description: 'Delicious sample dish'
-    };
-    export let quantity = 0;
-    export let maxQuantity = 10;
-  
-    const dispatch = createEventDispatcher();
-  
-    // Functions
-    function decreaseQuantity() {
-      if (quantity > 0) {
-        quantity -= 1;
-        dispatch('quantityChange', { 
-          item: item, 
-          quantity: quantity,
-          total: item.price * quantity 
-        });
-      }
-    }
-  
-    function increaseQuantity() {
-      if (quantity < maxQuantity) {
-        quantity += 1;
-        dispatch('quantityChange', { 
-          item: item, 
-          quantity: quantity,
-          total: item.price * quantity 
-        });
-      }
-    }
-  
-    // Reactive statements
-    $: totalPrice = (item.price * quantity).toFixed(2);
-    $: isInCart = quantity > 0;
-  </script>
+	import { cart } from '$lib/stores/cart.svelte.js';
+
+	// Props
+	let {
+		item = {
+			id: 1,
+			name: 'Sample Dish',
+			price: 12.99,
+			imageUrl: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
+			description: 'Delicious sample dish'
+		},
+		maxQuantity = 10
+	} = $props();
+
+	const cartItem = $derived(cart.items.get(item.id));
+	const quantity = $derived(cartItem?.quantity ?? 0);
+
+	function decreaseQuantity() {
+		cart.updateItemQuantity(item, quantity - 1);
+	}
+
+	function increaseQuantity() {
+		cart.updateItemQuantity(item, quantity + 1);
+	}
+
+	const totalPrice = $derived((Number(item.price) * quantity).toFixed(2));
+	const isInCart = $derived(quantity > 0);
+</script>
   
   <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200">
     <!-- Image Section -->
