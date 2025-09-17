@@ -2,8 +2,9 @@
 	import '../../app.css';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { page } from '$app/state';
-	import { cart } from '$lib/stores/cart.svelte.js';
+	import FloatingCart from '$lib/components/FloatingCart/FloatingCart.svelte';
 
+	/** @type {import('./$types').LayoutData} */
 	let { children, data } = $props();
 
 	const { categories } = data;
@@ -23,9 +24,8 @@
 			</Button>
 		{/each}
 	</div>
-	<div>
-		<Button variant="secondary"> Cart ({cart.totalItems}) - ₹{cart.totalPrice.toFixed(2)} </Button>
-	</div>
 </div>
 
 {@render children()}
+
+<FloatingCart />

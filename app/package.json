@@ -64,6 +64,7 @@
 	],
 	"dependencies": {
 		"drizzle-orm": "^0.44.5",
+		"lucide-svelte": "^0.544.0",
 		"postgres": "^3.4.5"
 	}
 }
