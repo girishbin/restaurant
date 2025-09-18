@@ -2,7 +2,7 @@ import { db } from '$lib/server/db';
 import { menuItems } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 
-/** @type {import('./$types').PageServerLoad} */
+// @type {import('./$types').PageServerLoad} 
 export const load = async ({ url }) => {
 	const category = url.searchParams.get('category');
 
