@@ -1,10 +1,12 @@
 <script>
 	// Use the new runes-based cart store
-	import { cart } from '$lib/stores/cart.svelte.js';
+	import { getContext } from 'svelte';
 	import { enhance, applyAction } from '$app/forms';
 
 	/** @type {import('./$types').ActionData} */
 	let { form } = $props();
+
+	const cart = getContext('cart');
 
 	// With Svelte 5 runes, we can create derived state for the form
 	const rawItems = $derived(JSON.stringify(Array.from(cart.items.values())));

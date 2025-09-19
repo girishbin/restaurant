@@ -1,11 +1,14 @@
 <script>
-	import { cart } from '$lib/stores/cart.svelte.js';
+	import { getContext } from 'svelte';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '$lib/components/ui/card/index.js';
 	import { Minus, Plus, Trash2, ChevronDown, ChevronUp } from 'lucide-svelte';
 	import { slide } from 'svelte/transition';
 
 	let showCart = $state(false);
+
+	// Retrieve the cart store from the context provided by a parent layout.
+	const cart = getContext('cart');
 </script>
 
 {#if cart.totalItems > 0}
