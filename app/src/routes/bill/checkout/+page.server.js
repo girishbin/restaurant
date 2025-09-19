@@ -15,11 +15,10 @@ const cartItemsSchema = z.array(cartItemSchema);
 
 /**
  * Parses and validates cart items from a request.
- * @param {Request} request The incoming request object.
+ * @param {FormData} formData The form data from the request.
  * @returns {Promise<{data?: z.infer<typeof cartItemsSchema>, error?: import('@sveltejs/kit').ActionFailure}>}
  */
-async function parseAndValidateCart(request) {
-	const formData = await request.formData();
+function parseAndValidateCartItems(formData) {
 	const cartData = formData.get('items');
 
 	if (typeof cartData !== 'string') {
@@ -41,25 +40,14 @@ async function parseAndValidateCart(request) {
 }
 
 export const actions = {
-	// This action prepares the data for the confirmation screen.
-	prepare: async ({ request }) => {
-		const { data: parsedCartItems, error } = await parseAndValidateCart(request);
-		if (error) return error;
-
-		const total = parsedCartItems.reduce((sum, item) => sum + item.total, 0);
-
-		// Return the items to be displayed on the confirmation page.
-		return {
-			items: parsedCartItems,
-			rawItems: JSON.stringify(parsedCartItems), // Re-serialize validated data
-			total: total.toFixed(2)
-		};
-	},
-
 	// This new action will handle the final confirmation and database insertion.
 	confirm: async ({ request }) => {
-		const { data: parsedCartItems, error } = await parseAndValidateCart(request);
+		const formData = await request.formData();
+		const { data: parsedCartItems, error } = parseAndValidateCartItems(formData);
 		if (error) return error;
+
+		const customerName = formData.get('customerName');
+		const customerPhone = formData.get('customerPhone');
 
 		try {
 			await db.transaction(async (tx) => {
@@ -70,6 +58,8 @@ export const actions = {
 					.insert(bills)
 					.values({
 						billNumber: billNumber,
+						customerName: typeof customerName === 'string' && customerName ? customerName.trim() : null,
+						customerPhone: typeof customerPhone === 'string' && customerPhone ? customerPhone.trim() : null,
 						totalAmount: String(total.toFixed(2)),
 						finalAmount: String(total.toFixed(2)) // Assuming no tax/discount for now
 					})
