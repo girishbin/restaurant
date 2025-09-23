@@ -1,13 +1,14 @@
-/// <reference types="node" />
+// drizzle.config.ts
+import type { Config } from 'drizzle-kit';
 
-import { defineConfig } from 'drizzle-kit';
-
-if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL is not set');
-
-export default defineConfig({
+export default {
 	schema: './src/lib/server/db/schema.ts',
-	dialect: 'postgresql',
-	dbCredentials: { url: process.env.DATABASE_URL },
-	verbose: true,
-	strict: true
-});
+	out: './migrations',
+	dialect: 'sqlite', // D1 uses a SQLite-compatible engine
+	driver: 'd1-http',
+	dbCredentials: {
+		accountId: process.env.CLOUDFLARE_ACCOUNT_ID!,
+		databaseId: process.env.CLOUDFLARE_D1_DATABASE_ID!,
+		token: process.env.CLOUDFLARE_D1_API_TOKEN!
+	}
+} satisfies Config;

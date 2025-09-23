@@ -1,113 +1,94 @@
-import { fail } from '@sveltejs/kit';
-import { db } from '$lib/server/db';
+import { fail, redirect } from '@sveltejs/kit';
 import { bills, billItems } from '$lib/server/db/schema';
 import { z } from 'zod';
+import { zfd } from 'zod-form-data';
 
-const cartItemSchema = z.object({
-	id: z.number(),
-	name: z.string(),
-	price: z.string(),
-	quantity: z.number().min(1),
-	total: z.number()
+// This schema validates the incoming form data.
+// It expects a JSON string for the cart items.
+const checkoutSchema = zfd.formData({
+	customerName: zfd.text(z.string().optional()),
+	customerPhone: zfd.text(z.string().optional()),
+	paymentMethod: zfd.text(z.enum(['cash', 'card', 'upi'])),
+	items: zfd.json(
+		z.array(
+			z.object({
+				id: z.number(),
+				name: z.string(),
+				price: z.number(),
+				quantity: z.number()
+			})
+		).min(1, "Cannot checkout with an empty cart.")
+	)
 });
 
-const cartItemsSchema = z.array(cartItemSchema);
-
-/**
- * Parses and validates cart items from a request.
- * @param {FormData} formData The form data from the request.
- * @returns {Promise<{data?: z.infer<typeof cartItemsSchema>, error?: import('@sveltejs/kit').ActionFailure}>}
- */
-function parseAndValidateCartItems(formData) {
-	const cartData = formData.get('items');
-
-	if (typeof cartData !== 'string') {
-		return { error: fail(400, { message: 'Invalid cart data submitted.' }) };
-	}
-
-	const parseResult = cartItemsSchema.safeParse(JSON.parse(cartData));
-
-	if (!parseResult.success) {
-		return { error: fail(400, { message: 'Cart data is corrupt or invalid.' }) };
-	}
-	const parsedCartItems = parseResult.data;
-
-	if (parsedCartItems.length === 0) {
-		return { error: fail(400, { message: 'Cart is empty.' }) };
-	}
-
-	return { data: parsedCartItems };
-}
-
 export const actions = {
-	// This new action will handle the final confirmation and database insertion.
-	confirm: async ({ request }) => {
+	confirm: async ({ request, locals }) => {
+		// 1. Get the database connection from locals
+		const { db } = locals;
+
 		const formData = await request.formData();
-		const { data: parsedCartItems, error } = parseAndValidateCartItems(formData);
-		if (error) return error;
+		const result = checkoutSchema.safeParse(formData);
 
-		const customerName = formData.get('customerName');
-		const customerPhone = formData.get('customerPhone');
-		const paymentMethod = formData.get('paymentMethod');
+		// 2. Validate the form data
+		if (!result.success) {
+			const errors = result.error.flatten();
+			return fail(400, { issues: errors.fieldErrors });
+		}
 
+		const { customerName, customerPhone, paymentMethod, items } = result.data;
+
+		// 3. Perform calculations and database operations in a transaction
 		try {
-			const billDetails = await db.transaction(async (tx) => {
-				const finalAmount = parsedCartItems.reduce((sum, item) => sum + item.total, 0);
-				const totalAmount = finalAmount / 1.05; // Pre-tax amount
-				const taxAmount = finalAmount - totalAmount;
-				const billNumber = `BILL-${Date.now()}`;
+			const newBill = await db.transaction(async (tx) => {
+				const totalAmount = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+				// For now, final amount is the same as total. You can add tax/discounts here.
+				const finalAmount = totalAmount;
 
-				const [newBill] = await tx
+				// Insert the main bill record
+				const [bill] = await tx
 					.insert(bills)
 					.values({
-						billNumber: billNumber,
-						customerName: typeof customerName === 'string' && customerName ? customerName.trim() : null,
-						customerPhone: typeof customerPhone === 'string' && customerPhone ? customerPhone.trim() : null,
-						paymentMethod: typeof paymentMethod === 'string' ? paymentMethod : 'cash',
-						totalAmount: String(totalAmount.toFixed(2)),
-						taxAmount: String(taxAmount.toFixed(2)),
-						finalAmount: String(finalAmount.toFixed(2))
+						billNumber: `BILL-${Date.now()}`, // A simple unique bill number
+						customerName,
+						customerPhone,
+						paymentMethod,
+						totalAmount,
+						finalAmount,
+						paymentStatus: 'paid' // Assume payment is successful on checkout
 					})
-					.returning({ id: bills.id, billNumber: bills.billNumber, createdAt: bills.createdAt });
+					.returning({ id: bills.id });
 
-				if (!newBill) {
-					throw new Error('Failed to create bill.');
+				if (!bill) {
+					tx.rollback();
+					return;
 				}
 
-				if (parsedCartItems.length > 0) {
-					const itemsToInsert = parsedCartItems.map((item) => ({
-						billId: newBill.id,
-						menuItemId: item.id,
-						itemName: item.name,
-						itemPrice: item.price,
-						quantity: item.quantity,
-						subtotal: String(item.total.toFixed(2))
-					}));
-					await tx.insert(billItems).values(itemsToInsert);
-				}
+				// Prepare all the individual bill items
+				const billItemsToInsert = items.map((item) => ({
+					billId: bill.id,
+					menuItemId: item.id,
+					itemName: item.name,
+					itemPrice: item.price,
+					quantity: item.quantity,
+					subtotal: item.price * item.quantity
+				}));
 
-				return {
-					billNumber: newBill.billNumber,
-					customerName: typeof customerName === 'string' && customerName ? customerName.trim() : null,
-					customerPhone:
-						typeof customerPhone === 'string' && customerPhone ? customerPhone.trim() : null,
-					paymentMethod: typeof paymentMethod === 'string' ? paymentMethod : 'cash',
-					items: parsedCartItems,
-					totalAmount: totalAmount.toFixed(2),
-					taxAmount: taxAmount.toFixed(2),
-					finalAmount: finalAmount.toFixed(2),
-					createdAt: newBill.createdAt.toISOString()
-				};
+				// Insert all bill items
+				await tx.insert(billItems).values(billItemsToInsert);
+
+				return bill;
 			});
 
-			if (!billDetails) {
-				throw new Error('Transaction failed, could not retrieve bill details.');
+			if (!newBill) {
+				return fail(500, { message: 'Could not create the bill.' });
 			}
 
-			return { success: true, bill: billDetails };
+			// 4. Redirect on success
+			throw redirect(303, `/bill/receipt/${newBill.id}`); // Redirect to a receipt page
+
 		} catch (error) {
-			console.error('Checkout error:', error);
-			return fail(500, { message: 'Could not process checkout.' });
+			console.error('Checkout Error:', error);
+			return fail(500, { message: 'An unexpected error occurred during checkout.' });
 		}
 	}
 };

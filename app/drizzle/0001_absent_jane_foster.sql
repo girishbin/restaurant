@@ -1,1 +1,0 @@
-ALTER TABLE "menu_items" ADD COLUMN "image_url" varchar(255);
