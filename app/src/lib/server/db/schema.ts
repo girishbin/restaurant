@@ -16,7 +16,7 @@ export const menuItems = sqliteTable('menu_items', {
 
 // Bills/Invoices table - stores bill information
 export const bills = sqliteTable('bills', {
-	id: integer('id').primaryKey({ autoIncrement: true }),
+	id: text('id').primaryKey(),
 	billNumber: text('bill_number', { length: 50 }).notNull().unique(),
 	customerName: text('customer_name', { length: 100 }),
 	customerPhone: text('customer_phone', { length: 20 }),
@@ -33,7 +33,7 @@ export const bills = sqliteTable('bills', {
 // Bill Items table - stores individual items in each bill
 export const billItems = sqliteTable('bill_items', {
 	id: integer('id').primaryKey({ autoIncrement: true }),
-  billId: integer('bill_id').notNull().references(() => bills.id, { onDelete: 'cascade' }),
+  billId: text('bill_id').notNull().references(() => bills.id, { onDelete: 'cascade' }),
   menuItemId: integer('menu_item_id').notNull().references(() => menuItems.id),
 	itemName: text('item_name', { length: 100 }).notNull(), // Store name at time of order
 	itemPrice: real('item_price').notNull(), // Store price at time of order

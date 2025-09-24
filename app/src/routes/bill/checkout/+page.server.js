@@ -1,5 +1,6 @@
 import { fail, redirect } from '@sveltejs/kit';
 import { bills, billItems } from '$lib/server/db/schema';
+import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import { zfd } from 'zod-form-data';
 
@@ -37,58 +38,53 @@ export const actions = {
 
 		const { customerName, customerPhone, paymentMethod, items } = result.data;
 
-		// 3. Perform calculations and database operations in a transaction
+		// 3. Generate a UUID for the new bill on the server
+		const billId = randomUUID();
+
 		try {
-			const newBill = await db.transaction(async (tx) => {
-				const totalAmount = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-				// For now, final amount is the same as total. You can add tax/discounts here.
-				const finalAmount = totalAmount;
+			// 4. Prepare batch statements for an atomic D1 transaction
+			const totalAmount = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+			// For now, final amount is the same as total. You can add tax/discounts here.
+			const finalAmount = totalAmount;
 
-				// Insert the main bill record
-				const [bill] = await tx
-					.insert(bills)
-					.values({
-						billNumber: `BILL-${Date.now()}`, // A simple unique bill number
-						customerName,
-						customerPhone,
-						paymentMethod,
-						totalAmount,
-						finalAmount,
-						paymentStatus: 'paid' // Assume payment is successful on checkout
-					})
-					.returning({ id: bills.id });
-
-				if (!bill) {
-					tx.rollback();
-					return;
-				}
-
-				// Prepare all the individual bill items
-				const billItemsToInsert = items.map((item) => ({
-					billId: bill.id,
-					menuItemId: item.id,
-					itemName: item.name,
-					itemPrice: item.price,
-					quantity: item.quantity,
-					subtotal: item.price * item.quantity
-				}));
-
-				// Insert all bill items
-				await tx.insert(billItems).values(billItemsToInsert);
-
-				return bill;
+			const billStatement = db.insert(bills).values({
+				id: billId, // Use the generated UUID
+				billNumber: `BILL-${Date.now()}`,
+				customerName,
+				customerPhone,
+				paymentMethod,
+				totalAmount,
+				finalAmount,
+				paymentStatus: 'paid' // Assume payment is successful on checkout
 			});
 
-			if (!newBill) {
-				return fail(500, { message: 'Could not create the bill.' });
-			}
+			const billItemsToInsert = items.map((item) => ({
+				billId: billId, // Use the same generated UUID
+				menuItemId: item.id,
+				itemName: item.name,
+				itemPrice: item.price,
+				quantity: item.quantity,
+				subtotal: item.price * item.quantity
+			}));
 
-			// 4. Redirect on success
-			throw redirect(303, `/bill/receipt/${newBill.id}`); // Redirect to a receipt page
+			const billItemsStatement = db.insert(billItems).values(billItemsToInsert);
+
+			// 5. Execute both statements in a single, atomic batch
+			await db.batch([billStatement, billItemsStatement]);
 
 		} catch (error) {
+			// Drizzle will throw an error if the transaction fails.
+			// This could be due to a foreign key constraint (e.g., a menuItemId doesn't exist).
+			if (error instanceof Error && error.message.includes('FOREIGN KEY constraint failed')) {
+				console.error('Checkout Error - Foreign Key Constraint:', error);
+				return fail(400, { message: 'One or more items in the cart are invalid or no longer available. Please refresh and try again.' });
+			}
+
 			console.error('Checkout Error:', error);
 			return fail(500, { message: 'An unexpected error occurred during checkout.' });
 		}
+
+		// 6. Redirect on success, after the try...catch block has completed.
+		throw redirect(303, `/bill/receipt/${billId}`);
 	}
 };

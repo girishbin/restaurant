@@ -1,0 +1,4 @@
+
+npx drizzle-kit generate
+npx drizzle-kit migrate
+npx wrangler d1 migrations apply tawa-kettles

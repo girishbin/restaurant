@@ -113,6 +113,6 @@
 
 {@render children()}
 
-{#if page.route.id !== '/bill/checkout'}
+{#if page.route.id !== '/bill/checkout' && !page.route.id?.startsWith('/bill/receipt')}
 	<FloatingCart />
 {/if}

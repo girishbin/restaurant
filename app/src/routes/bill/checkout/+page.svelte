@@ -1,7 +1,7 @@
 <script>
 	// Use the new runes-based cart store
 	import { getContext } from 'svelte';
-	import { enhance, applyAction } from '$app/forms';
+	import { enhance } from '$app/forms';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { Minus, Plus, Trash2 } from 'lucide-svelte';
 
@@ -92,14 +92,13 @@
 				action="?/confirm"
 				class="space-y-6"
 				use:enhance={() => {
-					// This callback runs after the server responds
+					// This callback runs before the form is submitted.
+					// We return a function that runs after the server responds.
 					return async ({ result }) => {
-						// On successful confirmation, clear the cart store
-						if (result.type === 'success' && result.data?.success) {
+						// On a successful redirect, clear the cart. SvelteKit will handle the navigation.
+						if (result.type === 'redirect') {
 							cart.clearCart();
 						}
-						// Update the `form` prop with the action result
-						await applyAction(result);
 					};
 				}}
 			>
