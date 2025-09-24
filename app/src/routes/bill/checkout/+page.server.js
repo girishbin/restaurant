@@ -43,9 +43,11 @@ export const actions = {
 
 		try {
 			// 4. Prepare batch statements for an atomic D1 transaction
-			const totalAmount = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-			// For now, final amount is the same as total. You can add tax/discounts here.
-			const finalAmount = totalAmount;
+			const finalAmount = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+			
+			// Calculate subtotal (pre-tax) and tax amount from the final, tax-inclusive price.
+			const subtotal = finalAmount * 0.95;
+			const taxAmount = finalAmount * 0.05;
 
 			const billStatement = db.insert(bills).values({
 				id: billId, // Use the generated UUID
@@ -53,8 +55,9 @@ export const actions = {
 				customerName,
 				customerPhone,
 				paymentMethod,
-				totalAmount,
-				finalAmount,
+				totalAmount: subtotal, // Store the pre-tax amount as totalAmount
+				taxAmount: taxAmount, // Store the calculated tax
+				finalAmount: finalAmount, // Store the final, inclusive amount
 				paymentStatus: 'paid' // Assume payment is successful on checkout
 			});
 
@@ -62,9 +65,9 @@ export const actions = {
 				billId: billId, // Use the same generated UUID
 				menuItemId: item.id,
 				itemName: item.name,
-				itemPrice: item.price,
+				itemPrice: item.price * 0.95, // Store the pre-tax item price
 				quantity: item.quantity,
-				subtotal: item.price * item.quantity
+				subtotal: (item.price * item.quantity) * 0.95 // Store the pre-tax line total
 			}));
 
 			const billItemsStatement = db.insert(billItems).values(billItemsToInsert);

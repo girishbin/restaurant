@@ -50,7 +50,7 @@
 		<div class="border-t border-dashed border-gray-400 pt-2">
 			<div class="flex justify-between">
 				<span>Subtotal</span>
-				<span>₹{bill.totalAmount.toFixed(2)}</span>
+				<span>₹{Number(bill.totalAmount).toFixed(2)}</span>
 			</div>
 			<div class="flex justify-between">
 				<span>Tax/GST</span>
@@ -77,4 +77,3 @@
 		.no-print { display: none; }
 	}
 </style>
-
