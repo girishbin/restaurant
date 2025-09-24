@@ -1,12 +1,14 @@
 <script>
 	// Use the new runes-based cart store
 	import { getContext } from 'svelte';
-	import { enhance } from '$app/forms';
+	import { enhance, applyAction } from '$app/forms';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { Minus, Plus, Trash2 } from 'lucide-svelte';
 
 	/** @type {import('./$types').ActionData} */
 	let { form } = $props();
+
+	let submitting = $state(false);
 
 	const cart = getContext('cart');
 
@@ -15,7 +17,7 @@
 </script>
 
 <div class="flex flex-col items-center justify-center min-h-screen p-4 text-center">
-	{#if form?.success && form.bill}
+	{#if false && form?.success && form.bill}
 		<!-- Printable Bill screen -->
 		<div class="w-full max-w-md p-6 bg-white rounded-lg shadow-md dark:bg-gray-800 text-left font-mono printable-bill">
 			<div class="text-center mb-6">
@@ -74,7 +76,7 @@
 				<Button href="/bill" variant="outline">New Order</Button>
 			</div>
 		</div>
-	{:else if cart.items.size > 0}
+	{:else if cart.items.size > 0 || submitting}
 		<!-- Confirmation screen -->
 		<div class="w-full max-w-2xl p-6 bg-white rounded-lg shadow-md dark:bg-gray-800">
 			{#if form?.message}
@@ -92,13 +94,18 @@
 				action="?/confirm"
 				class="space-y-6"
 				use:enhance={() => {
-					// This callback runs before the form is submitted.
-					// We return a function that runs after the server responds.
+					submitting = true;
 					return async ({ result }) => {
-						// On a successful redirect, clear the cart. SvelteKit will handle the navigation.
 						if (result.type === 'redirect') {
 							cart.clearCart();
+							// SvelteKit will handle the navigation automatically.
+							// We don't need to set submitting = false here.
+						} else {
+							// On failure, allow the user to try again.
+							submitting = false;
 						}
+						// applyAction is needed to update the `form` prop with any validation errors.
+						await applyAction(result);
 					};
 				}}
 			>
