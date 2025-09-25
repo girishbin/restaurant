@@ -38,6 +38,6 @@
 			</div>
 			<Button type="submit" class="w-full">Login</Button>
 		</form>
-		<p class="text-sm text-center text-gray-500">Hint: Use user/password or admin/password</p>
+		<p class="text-sm text-center text-gray-500">Hint: Use user or admin</p>
 	</div>
 </div>

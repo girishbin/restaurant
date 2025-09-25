@@ -5,13 +5,18 @@
 	let { data, children } = $props();
 </script>
 
-<header class="p-4 bg-gray-100 dark:bg-gray-800 border-b flex justify-between items-center">
-	<a href="/" class="text-xl font-bold">Restaurant POS</a>
+<header class="p-4 bg-gradient-to-r from-primary/10 to-primary/30 border-b flex justify-between items-center">
+	<div class="flex items-center gap-6">
+		<a href="/" aria-label="Back to homepage">
+			<img src="/logo.svg" alt="Logo" class="w-24 h-24" />
+		</a>
+		<a href="/" class="text-4xl font-['Great_Vibes']">Tawa & Kettles Caffe</a>
+	</div>
 	{#if data.user}
-		<div class="flex items-center gap-4">
-			<span>Welcome, <span class="font-semibold">{data.user.username}</span> ({data.user.role})</span>
+		<div class="flex items-center gap-4 text-primary-foreground">
+			<span class="font-semibold text-black">{data.user.username}</span>
 			<form action="/login?/logout" method="POST">
-				<Button type="submit" variant="outline">Logout</Button>
+				<Button type="submit">Logout</Button>
 			</form>
 		</div>
 	{:else}

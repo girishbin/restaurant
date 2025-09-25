@@ -16,3 +16,7 @@ binding = "DB" # This is how you'll access it in your code (event.platform.env.D
 database_name = "tawa-kettles"
 database_id = "796a1f1d-2eeb-49fa-9b89-e5851ae1f458" # Get this from your Cloudflare dashboard or `wrangler d1 list`
 migrations_dir = "migrations"
+
+[[routes]]
+pattern = "rt.optimaflare.tech"
+custom_domain = true

@@ -16,7 +16,7 @@
 		<div class="w-full max-w-2xl">
 			{#if showCart}
 				<div transition:slide={{ duration: 200, axis: 'y' }}>
-					<Card>
+					<Card class="border-2 border-primary">
 						<CardHeader class="flex flex-row items-center justify-between p-4">
 							<CardTitle>Your Cart ({cart.totalItems})</CardTitle>
 							<Button type="button" variant="ghost" size="icon" onclick={() => (showCart = false)}>
@@ -72,7 +72,10 @@
 				</div>
 			{:else}
 				<div class="flex justify-center">
-					<Button onclick={() => (showCart = true)} class="w-full shadow-lg">
+					<Button
+						onclick={() => (showCart = true)}
+						class="w-full shadow-lg bg-[oklch(0.47_0.14_37)] hover:bg-[oklch(0.42_0.13_37)]"
+					>
 						View Cart ({cart.totalItems}) - ₹{cart.totalPrice.toFixed(2)}
 						<ChevronUp class="ml-2 h-4 w-4" />
 					</Button>

@@ -15,6 +15,6 @@
   <link rel="icon" href="./favicon.svg" />
 
 <div class="p-8 flex justify-center gap-4">
-  <Button onclick={navigateToBill}>Make bills</Button>
-  <Button onclick={navigateToAdmin}>View all bills</Button>
+  <Button onclick={navigateToBill}>Make Bill</Button>
+  <Button onclick={navigateToAdmin}>View bills</Button>
 </div>
