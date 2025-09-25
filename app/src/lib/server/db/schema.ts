@@ -1,6 +1,16 @@
 import { sqliteTable, integer, text, real } from 'drizzle-orm/sqlite-core';
 import { relations, sql } from 'drizzle-orm';
 
+// Simple auth user table
+export const users = sqliteTable('users', {
+	id: integer('id').primaryKey({ autoIncrement: true }),
+	username: text('username', { length: 100 }).notNull().unique(),
+	role: text('role', { enum: ['admin', 'user'] }).default('user').notNull(),
+	password: text('password', { length: 100 }).notNull(),
+	createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
+	updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`)
+});
+
 // Menu Items table - stores all available menu items
 export const menuItems = sqliteTable('menu_items', {
 	id: integer('id').primaryKey({ autoIncrement: true }),
@@ -64,6 +74,10 @@ export const billItemsRelations = relations(billItems, ({ one }) => ({
 }));
 
 // Export types for TypeScript
+
+export type UserInsert = typeof users.$inferInsert;
+export type UserSelect = typeof users.$inferSelect;
+
 export type MenuItemInsert = typeof menuItems.$inferInsert;
 export type MenuItemSelect = typeof menuItems.$inferSelect;
 

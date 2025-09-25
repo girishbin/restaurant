@@ -1,0 +1,17 @@
+Pop up a local DB fresh:
+- - - - - - - - - - - - - - - - - - - - - - - - - -
+1. rm -fr .wrangler
+1. npx drizzle-kit generate
+2. npx drizzle-kit migrate ( This creates a fresh tables without records )
+3. wrangler d1 execute tawa-kettles --local --file=./tools/d1-backup-fixed.sql 
+   ( d1-backup-fixed.sql contains creation of tables, so delete them. Only INSERTS should be added)
+
+
+Add the diff to remote Database 
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+1. get the latest .sql migration file in ./migrations/
+2. npx wrangler d1 execute tawa-kettles --remote --file=./migrations/0002_wise_norman_osborn.sql
+
+remote:
+wrangler d1 export tawa-kettles --remote --output=./d1-backup.sql
+

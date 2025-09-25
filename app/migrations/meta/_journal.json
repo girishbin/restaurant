@@ -15,6 +15,13 @@
       "when": 1758651794243,
       "tag": "0001_special_starfox",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1758825775457,
+      "tag": "0002_wise_norman_osborn",
+      "breakpoints": true
     }
   ]
 }

@@ -1,21 +1,22 @@
-import { findUserByUsername } from '$lib/server/auth.js';
+import { findUserByUsername, comparePassword } from '$lib/server/auth.js';
 import { fail, redirect } from '@sveltejs/kit';
 
 export const actions = {
-	login: async ({ cookies, request, url }) => {
+	login: async ({ cookies, request, url, locals }) => {
 		const data = await request.formData();
 		const username = data.get('username');
 		const password = data.get('password');
 
 		if (!username || !password) {
-			return fail(400, { message: 'Missing username or password' });
+			return fail(400, { message: 'Missing username or password', incorrect: true });
 		}
 
-		const user = findUserByUsername(username);
+		const user = await findUserByUsername(locals.db, username);
 
-		// In a real app, use hashed passwords!
-		if (!user || user.password !== password) {
-			return fail(400, { message: 'Invalid credentials' });
+		// Check if user exists and if the password is correct
+		const passwordMatch = user && (await comparePassword(password, user.password));
+		if (!user || !passwordMatch) {
+			return fail(400, { message: 'Invalid credentials', incorrect: true });
 		}
 
 		// Set a session cookie

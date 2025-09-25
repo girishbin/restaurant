@@ -18,10 +18,10 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	if (sessionId) {
 		// Find the user based on the session
-		const user = findUserById(sessionId);
+		const user = await findUserById(event.locals.db, Number(sessionId));
 		if (user) {
 			// If the user is found, attach them to the event locals for access in pages/actions
-			event.locals.user = { id: user.id, username: user.username, role: user.role };
+			event.locals.user = user;
 		}
 	}
 

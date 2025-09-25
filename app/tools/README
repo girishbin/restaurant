@@ -1,3 +1,0 @@
-wrangler d1 export tawa-kettles --remote --output=./d1-backup.sql
-wrangler d1 execute tawa-kettles --local --file=./d1-backup.sql
-
