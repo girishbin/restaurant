@@ -1,4 +1,8 @@
 <script>
+	import { Button } from '$lib/components/ui/button';
+	import { Input } from '$lib/components/ui/input';
+	import { Label } from '$lib/components/ui/label';
+
 	/** @type {import('./$types').PageData} */
 	export let data;
 
@@ -20,40 +24,29 @@
 	<div class="mb-8 rounded-lg bg-white p-6 shadow-md">
 		<h2 class="mb-4 text-xl font-semibold text-gray-700">Add New User</h2>
 		<form method="POST" action="?/addUser" class="space-y-4">
-			<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-				<div>
-					<label for="username" class="mb-1 block text-sm font-medium text-gray-600"
-						>Username</label
-					>
-					<input
+			<div class="grid grid-cols-1 items-end gap-4 md:grid-cols-3">
+				<div class="grid w-full items-center gap-1.5">
+					<Label for="username">Username</Label>
+					<Input
 						type="text"
 						id="username"
 						name="username"
+						placeholder="e.g., john.doe"
 						required
-						class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
 					/>
 				</div>
-				<div>
-					<label for="password" class="mb-1 block text-sm font-medium text-gray-600"
-						>Password</label
-					>
-					<input
+				<div class="grid w-full items-center gap-1.5">
+					<Label for="password">Password</Label>
+					<Input
 						type="password"
 						id="password"
 						name="password"
+						placeholder="••••••••"
 						required
 						minlength="6"
-						class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
 					/>
 				</div>
-				<div class="self-end">
-					<button
-						type="submit"
-						class="w-full rounded-md bg-blue-600 px-4 py-2 text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-					>
-						Add User
-					</button>
-				</div>
+				<Button type="submit" class="w-full">Add User</Button>
 			</div>
 			{#if form}
 				<p class:text-green-600={form.success} class:text-red-600={!form.success}>
