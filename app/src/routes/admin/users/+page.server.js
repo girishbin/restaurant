@@ -1,5 +1,5 @@
 import { fail } from '@sveltejs/kit';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { users } from '$lib/server/db/schema';
 import bcryptjs from 'bcryptjs';
 
@@ -29,11 +29,15 @@ export const actions = {
 
 		// --- Validation ---
 		if (typeof username !== 'string' || !username) {
-			return fail(400, { success: false, message: 'Username is required.' });
+			return fail(400, { action: 'addUser', success: false, message: 'Username is required.' });
 		}
 
 		if (typeof password !== 'string' || password.length < 6) {
-			return fail(400, { success: false, message: 'Password must be at least 6 characters long.' });
+			return fail(400, {
+				action: 'addUser',
+				success: false,
+				message: 'Password must be at least 6 characters long.'
+			});
 		}
 
 		// --- Check for existing user ---
@@ -42,7 +46,11 @@ export const actions = {
 		});
 
 		if (existingUser) {
-			return fail(400, { success: false, message: `Username "${username}" is already taken.` });
+			return fail(400, {
+				action: 'addUser',
+				success: false,
+				message: `Username "${username}" is already taken.`
+			});
 		}
 
 		// --- Create user ---
@@ -53,6 +61,60 @@ export const actions = {
 			role: 'user' // Explicitly set role to 'user'
 		});
 
-		return { success: true, message: `User "${username}" created successfully.` };
+		return { action: 'addUser', success: true, message: `User "${username}" created successfully.` };
+	},
+
+	changePassword: async ({ request, locals }) => {
+		const data = await request.formData();
+		const userId = data.get('userId');
+		const password = data.get('password');
+
+		if (typeof password !== 'string' || password.length < 6) {
+			return fail(400, {
+				action: 'changePassword',
+				success: false,
+				message: 'Password must be at least 6 characters long.'
+			});
+		}
+
+		if (!userId || typeof userId !== 'string') {
+			return fail(400, { action: 'changePassword', success: false, message: 'Invalid user ID.' });
+		}
+
+		const userIdNum = Number(userId);
+		if (userIdNum === locals.user?.id) {
+			return fail(403, {
+				action: 'changePassword',
+				success: false,
+				message: 'For security, you cannot change your own password from this page.'
+			});
+		}
+
+		const hashedPassword = await bcryptjs.hash(password, 10);
+		await locals.db.update(users).set({ password: hashedPassword }).where(eq(users.id, userIdNum));
+
+		return { action: 'changePassword', success: true, message: 'Password updated successfully.' };
+	},
+
+	deleteUser: async ({ request, locals }) => {
+		const data = await request.formData();
+		const userId = data.get('userId');
+
+		if (!userId || typeof userId !== 'string') {
+			return fail(400, { action: 'deleteUser', success: false, message: 'Invalid user ID.' });
+		}
+
+		const userIdNum = Number(userId);
+		if (userIdNum === locals.user?.id) {
+			return fail(403, {
+				action: 'deleteUser',
+				success: false,
+				message: 'You cannot delete your own account.'
+			});
+		}
+
+		await locals.db.delete(users).where(eq(users.id, userIdNum));
+
+		return { action: 'deleteUser', success: true, message: 'User deleted successfully.' };
 	}
 };
