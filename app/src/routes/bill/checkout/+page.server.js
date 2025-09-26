@@ -1,6 +1,7 @@
 import { fail, redirect } from '@sveltejs/kit';
-import { bills, billItems } from '$lib/server/db/schema';
+import { bills, billItems, menuItems} from '$lib/server/db/schema';
 import { randomUUID } from 'node:crypto';
+import { inArray } from 'drizzle-orm';
 import { z } from 'zod';
 import { zfd } from 'zod-form-data';
 
@@ -14,8 +15,6 @@ const checkoutSchema = zfd.formData({
 		z.array(
 			z.object({
 				id: z.number(),
-				name: z.string(),
-				price: z.number(),
 				quantity: z.number()
 			})
 		).min(1, "Cannot checkout with an empty cart.")
@@ -38,43 +37,68 @@ export const actions = {
 
 		const { customerName, customerPhone, paymentMethod, items } = result.data;
 
+		// --- Server-Side Price & Name Lookup (Security Enhancement) ---
+		// Get all unique item IDs from the cart.
+		const itemIds = items.map((item) => item.id);
+
+		// Fetch the authoritative details for these items from the database.
+		const menuItemsFromDB = await db.select().from(menuItems).where(inArray(menuItems.id, itemIds));
+
+		// Create a map for quick lookups.
+		const menuItemMap = new Map(menuItemsFromDB.map((dbItem) => [dbItem.id, dbItem]));
+
+		// Reconstruct the cart on the server with authoritative data.
+		// This prevents price tampering from the client.
+		const secureCartItems = items.map(item => {
+			const dbItem = menuItemMap.get(item.id);
+			if (!dbItem) {
+				// This case should be rare, but handles if an item was deleted after being added to cart.
+				throw new Error(`Item with ID ${item.id} not found in database.`);
+			}
+			return { ...dbItem, quantity: item.quantity };
+		});
+
 		// 3. Generate a UUID for the new bill on the server
 		const billId = randomUUID();
 
 		try {
-			// 4. Prepare batch statements for an atomic D1 transaction
-			const finalAmount = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-			
-			// Calculate subtotal (pre-tax) and tax amount from the final, tax-inclusive price.
+			// 4. Calculate bill totals using the secure, server-side cart data.
+			const finalAmount = secureCartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 			const subtotal = finalAmount * 0.95;
 			const taxAmount = finalAmount * 0.05;
 
-			const billStatement = db.insert(bills).values({
-				id: billId, // Use the generated UUID
+			// 5. Prepare all statements for D1's atomic batch operation.
+			const statements = [];
+
+			// Statement 1: Insert the main bill record.
+			statements.push(db.insert(bills).values({
+				id: billId,
 				billNumber: `BILL-${Date.now()}`,
 				customerName,
 				customerPhone,
 				paymentMethod,
-				totalAmount: subtotal, // Store the pre-tax amount as totalAmount
-				taxAmount: taxAmount, // Store the calculated tax
-				finalAmount: finalAmount, // Store the final, inclusive amount
-				paymentStatus: 'paid' // Assume payment is successful on checkout
-			});
-
-			const billItemsToInsert = items.map((item) => ({
-				billId: billId, // Use the same generated UUID
-				menuItemId: item.id,
-				itemName: item.name,
-				itemPrice: item.price * 0.95, // Store the pre-tax item price
-				quantity: item.quantity,
-				subtotal: (item.price * item.quantity) * 0.95 // Store the pre-tax line total
+				totalAmount: subtotal,
+				taxAmount: taxAmount,
+				finalAmount: finalAmount,
+				paymentStatus: 'paid'
 			}));
 
-			const billItemsStatement = db.insert(billItems).values(billItemsToInsert);
+			// Statements 2...N: Add a separate INSERT statement for EACH item.
+			// This is the most robust way to avoid the "too many SQL variables" error with D1's batch API,
+			// as it guarantees each statement is very small.
+			for (const item of secureCartItems) {
+				statements.push(db.insert(billItems).values({
+					billId: billId,
+					menuItemId: item.id,
+					itemName: item.name,
+					itemPrice: item.price * 0.95,
+					quantity: item.quantity,
+					subtotal: item.price * item.quantity * 0.95
+				}));
+			}
 
-			// 5. Execute both statements in a single, atomic batch
-			await db.batch([billStatement, billItemsStatement]);
-
+			// 6. Execute the entire batch. D1 guarantees this is atomic.
+			await db.batch(statements);
 		} catch (error) {
 			// Drizzle will throw an error if the transaction fails.
 			// This could be due to a foreign key constraint (e.g., a menuItemId doesn't exist).
@@ -87,7 +111,7 @@ export const actions = {
 			return fail(500, { message: 'An unexpected error occurred during checkout.' });
 		}
 
-		// 6. Redirect on success, after the try...catch block has completed.
+		// 7. Redirect on success
 		throw redirect(303, `/bill/receipt/${billId}`);
 	}
 };

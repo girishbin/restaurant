@@ -14,4 +14,3 @@ Add the diff to remote Database
 
 remote:
 wrangler d1 export tawa-kettles --remote --output=./d1-backup.sql
-

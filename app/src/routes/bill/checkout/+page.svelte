@@ -13,8 +13,13 @@
 	const cart = getContext('cart');
 
 	// With Svelte 5 runes, we can create derived state for the form
-	const rawItems = $derived(JSON.stringify(Array.from(cart.items.values())));
-
+	// Create a "lean" version of the cart items for the form submission,
+	// sending only the data required by the server. This reduces payload size.
+	const rawItems = $derived(
+		JSON.stringify(
+			Array.from(cart.items.values()).map((item) => ({ id: item.id, quantity: item.quantity }))
+		)
+	);
 	// Calculate subtotal and GST from the final price.
 	const subtotal = $derived(cart.totalPrice * 0.95);
 	const gstAmount = $derived(cart.totalPrice * 0.05);
