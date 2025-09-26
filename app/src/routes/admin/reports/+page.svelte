@@ -22,7 +22,7 @@
 					{#each data.bills as bill}
 						<Table.Row>
 							<Table.Cell class="font-medium">{bill.billNumber}</Table.Cell>
-							<Table.Cell>{new Date(bill.createdAt * 1000).toLocaleDateString()}</Table.Cell>
+							<Table.Cell>{new Date(bill.createdAt).toLocaleDateString()}</Table.Cell>
 							<Table.Cell class="capitalize">{bill.paymentMethod}</Table.Cell>
 							<Table.Cell class="capitalize">{bill.paymentStatus}</Table.Cell>
 							<Table.Cell class="text-right">₹{bill.finalAmount.toFixed(2)}</Table.Cell>

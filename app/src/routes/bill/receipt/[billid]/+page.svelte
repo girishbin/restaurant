@@ -11,8 +11,7 @@
 		<div class="text-center mb-6">
 			<h2 class="text-2xl font-bold">INVOICE</h2>
 			<p class="text-sm">Bill No: {bill.billNumber}</p>
-			<!-- D1 stores timestamps as seconds, JS Date needs milliseconds -->
-			<p class="text-sm">Date: {new Date(bill.createdAt * 1000).toLocaleString()}</p>
+			<p class="text-sm">Date: {new Date(bill.createdAt).toLocaleString()}</p>
 			<p class="text-sm capitalize">Payment: {bill.paymentMethod}</p>
 		</div>
 
