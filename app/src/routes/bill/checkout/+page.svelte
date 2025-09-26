@@ -260,10 +260,6 @@
 
 <style>
 	@media print {
-		/* 1. Hide everything on the page by default */
-		body * {
-			visibility: hidden;
-		}
 		/* 2. Then, make the printable section and all its children visible */
 		.printable-bill,
 		.printable-bill * {

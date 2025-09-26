@@ -6,8 +6,8 @@
       goto('/bill/');
     }
     
-    function navigateToAdmin() {
-      goto('/admin/all-bills');
+    function navigateToReports() {
+      goto('/admin/reports');
     }
   </script>
   
@@ -16,5 +16,5 @@
 
 <div class="p-8 flex justify-center gap-4">
   <Button onclick={navigateToBill}>Make bills</Button>
-  <Button onclick={navigateToAdmin}>View all bills</Button>
+  <Button onclick={navigateToReports}>View reports</Button>
 </div>

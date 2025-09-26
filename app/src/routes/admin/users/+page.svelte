@@ -33,38 +33,6 @@
 			toast.error(form.message);
 		}
 	}
-
-	// Function to handle opening change password dialog
-	function openChangePasswordDialog(user) {
-		console.log('Opening change password dialog for:', user);
-		selectedUser = user;
-		changePasswordOpen = true;
-		console.log('After setting: changePasswordOpen =', changePasswordOpen);
-	}
-
-	// Function to handle opening delete user dialog
-	function openDeleteUserDialog(user) {
-		console.log('Opening delete user dialog for:', user);
-		selectedUser = user;
-		deleteUserOpen = true;
-		console.log('After setting: deleteUserOpen =', deleteUserOpen);
-	}
-
-	// Test functions for debugging
-	function testChangePassword() {
-		console.log('TEST: Change password clicked');
-		changePasswordOpen = true;
-	}
-
-	function testDelete() {
-		console.log('TEST: Delete clicked');
-		deleteUserOpen = true;
-	}
-
-	// Debug reactive statements
-	$: console.log('changePasswordOpen:', changePasswordOpen);
-	$: console.log('deleteUserOpen:', deleteUserOpen);
-	$: console.log('selectedUser:', selectedUser);
 </script>
 
 <div class="container mx-auto max-w-4xl p-4 md:p-8">
@@ -150,13 +118,19 @@
 								<div class="flex items-center justify-end space-x-2">
 									<button 
 										class="rounded border border-gray-300 bg-white px-3 py-1 text-sm hover:bg-gray-50"
-										on:click={() => openChangePasswordDialog(user)}
+										on:click={() => {
+											selectedUser = user;
+											changePasswordOpen = true;
+										}}
 									>
 										Change Password
 									</button>
 									<button 
 										class="rounded bg-red-600 px-3 py-1 text-sm text-white hover:bg-red-700"
-										on:click={() => openDeleteUserDialog(user)}
+										on:click={() => {
+											selectedUser = user;
+											deleteUserOpen = true;
+										}}
 									>
 										Delete
 									</button>
@@ -244,10 +218,3 @@
 		</AlertDialog.Content>
 	</AlertDialog.Root>
 </div>
-
-<style>
-	/* Ensure dropdown items are clickable */
-	[data-radix-collection-item] {
-		cursor: pointer;
-	}
-</style>

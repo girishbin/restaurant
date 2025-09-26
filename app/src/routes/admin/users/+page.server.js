@@ -1,5 +1,5 @@
 import { fail } from '@sveltejs/kit';
-import { eq, and } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { users } from '$lib/server/db/schema';
 import bcryptjs from 'bcryptjs';
 
