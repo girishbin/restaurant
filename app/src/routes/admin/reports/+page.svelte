@@ -3,7 +3,8 @@
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { Input } from '$lib/components/ui/input/index.js';
 	import { Label } from '$lib/components/ui/label/index.js';
-	import { page } from '$app/stores';
+	import { page, navigating } from '$app/stores';
+	import { Progress } from '$lib/components/ui/progress/index.js';
 
 	let { data } = $props();
 
@@ -27,14 +28,19 @@
 </script>
 
 <div class="container mx-auto py-10">
-	<div class="flex justify-between items-center mb-6">
+	{#if $navigating}
+		<div class="fixed top-0 left-0 w-full h-1 z-50" style="background-color: oklch(0.44 0.07 188)">
+			<Progress class="w-full" />
+		</div>
+	{/if}
+	<div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
 		<h1 class="text-3xl font-bold">Bills Report</h1>
-		<form class="flex items-end gap-4">
-			<div>
+		<form class="flex flex-col sm:flex-row sm:items-end gap-4 w-full md:w-auto">
+			<div class="w-full sm:w-auto">
 				<Label for="from-date">From</Label>
 				<Input type="date" id="from-date" name="from" bind:value={fromDate} />
 			</div>
-			<div>
+			<div class="w-full sm:w-auto">
 				<Label for="to-date">To</Label>
 				<Input type="date" id="to-date" name="to" bind:value={toDate} />
 			</div>
@@ -44,11 +50,15 @@
 	</div>
 
 	<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
-		<div class="rounded-lg border bg-card text-card-foreground shadow-sm p-6">
-			<h3 class="text-sm font-medium text-muted-foreground">Total Sales</h3>
+		<div class="rounded-lg border shadow-sm bg-gradient-to-r from-primary/40 to-primary/50 p-6">
+			<h3 class="text-sm font-medium text-foreground/80">Total Sales</h3>
 			<div class="text-2xl font-bold mt-2">
 				₹{data.totalSales.toFixed(2)}
 			</div>
+		</div>
+		<div class="rounded-lg border shadow-sm bg-gradient-to-r from-primary/40 to-primary/50 p-6">
+			<h3 class="text-sm font-medium text-foreground/80">Total Bills</h3>
+			<div class="text-2xl font-bold mt-2">{data.totalBills}</div>
 		</div>
 	</div>
 

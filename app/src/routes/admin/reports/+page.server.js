@@ -41,8 +41,11 @@ export async function load({ locals, url }) {
 
 	const totalSales = allBills.reduce((sum, bill) => sum + Number(bill.finalAmount), 0);
 
+	const totalBills = allBills.length;
+
 	return {
 		bills: allBills,
-		totalSales: totalSales
+		totalSales: totalSales,
+		totalBills: totalBills
 	};
 }
