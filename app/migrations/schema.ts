@@ -1,4 +1,4 @@
-import { sqliteTable, AnySQLiteColumn, integer, text, real, foreignKey, uniqueIndex } from "drizzle-orm/sqlite-core"
+import { sqliteTable, AnySQLiteColumn, integer, text, real, foreignKey, uniqueIndex, numeric } from "drizzle-orm/sqlite-core"
   import { sql } from "drizzle-orm"
 
 export const menuItems = sqliteTable("menu_items", {
@@ -54,4 +54,10 @@ export const users = sqliteTable("users", {
 (table) => [
 	uniqueIndex("users_username_unique").on(table.username),
 ]);
+
+export const d1Migrations = sqliteTable("d1_migrations", {
+	id: integer().primaryKey({ autoIncrement: true }),
+	name: text(),
+	appliedAt: numeric("applied_at").default(sql`(CURRENT_TIMESTAMP)`).notNull(),
+});
 

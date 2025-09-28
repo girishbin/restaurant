@@ -1,0 +1,1 @@
+ALTER TABLE `bills` ADD `table_number` integer NOT NULL;

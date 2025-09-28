@@ -11,6 +11,7 @@ const checkoutSchema = zfd.formData({
 	customerName: zfd.text(z.string().optional()),
 	customerPhone: zfd.text(z.string().optional()),
 	paymentMethod: zfd.text(z.enum(['cash', 'card', 'upi'])),
+	tableNumber: zfd.numeric(z.number()),
 	items: zfd.json(
 		z.array(
 			z.object({
@@ -35,7 +36,7 @@ export const actions = {
 			return fail(400, { issues: errors.fieldErrors });
 		}
 
-		const { customerName, customerPhone, paymentMethod, items } = result.data;
+		const { customerName, customerPhone, paymentMethod, tableNumber, items } = result.data;
 
 		// --- Server-Side Price & Name Lookup (Security Enhancement) ---
 		// Get all unique item IDs from the cart.
@@ -80,7 +81,8 @@ export const actions = {
 				totalAmount: subtotal,
 				taxAmount: taxAmount,
 				finalAmount: finalAmount,
-				paymentStatus: 'paid'
+				paymentStatus: 'paid',
+				tableNumber: tableNumber
 			}));
 
 			// Statements 2...N: Add a separate INSERT statement for EACH item.

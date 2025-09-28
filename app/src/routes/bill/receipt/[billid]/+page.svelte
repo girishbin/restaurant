@@ -16,6 +16,7 @@
 				<p class="text-sm">Bill No: {bill.billNumber}</p>
 				<p class="text-sm">Date: {new Date(bill.createdAt).toLocaleString()}</p>
 				<p class="text-sm capitalize">Payment: {bill.paymentMethod}</p>
+				{#if bill.tableNumber}<p class="text-sm">Table No: {bill.tableNumber}</p>{/if}
 			</div>
 			{#if bill.customerName || bill.customerPhone}
 				<div class="mb-4">

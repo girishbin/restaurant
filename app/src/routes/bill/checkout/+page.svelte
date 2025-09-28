@@ -3,6 +3,7 @@
 	import { getContext } from 'svelte';
 	import { enhance, applyAction } from '$app/forms';
 	import { Button } from '$lib/components/ui/button/index.js';
+	import * as Select from "$lib/components/ui/select/index.js";
 	import { Minus, Plus, Trash2 } from 'lucide-svelte';
 
 	/** @type {import('./$types').ActionData} */
@@ -11,6 +12,8 @@
 	let submitting = $state(false);
 
 	const cart = getContext('cart');
+	const tableNumber = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+	let selectedTableNumber = $state('');
 
 	// With Svelte 5 runes, we can create derived state for the form
 	// Create a "lean" version of the cart items for the form submission,
@@ -20,6 +23,11 @@
 			Array.from(cart.items.values()).map((item) => ({ id: item.id, quantity: item.quantity }))
 		)
 	);
+
+	const triggerContent = $derived(
+		selectedTableNumber || 'Select a table'
+	);
+
 	// Calculate subtotal and GST from the final price.
 	const subtotal = $derived(cart.totalPrice * 0.95);
 	const gstAmount = $derived(cart.totalPrice * 0.05);
@@ -138,6 +146,24 @@
 							class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
 							placeholder="Optional"
 						/>
+					</div>
+				    <div class="space-y-1 text-left">
+						<label for="tableNumber" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+						  Table Number
+						</label>
+						<Select.Root type="single" name="tableNumber" bind:value={selectedTableNumber}>
+						  <Select.Trigger id="tableNumber" class="w-full sm:w-[180px]">
+							{triggerContent}
+						  </Select.Trigger>
+						  <Select.Content>
+							<Select.Group>
+							  <Select.Label>Tables</Select.Label>
+							  {#each tableNumber as table}
+								<Select.Item value={String(table)}>{table}</Select.Item>
+							  {/each}
+							</Select.Group>
+						  </Select.Content>
+						</Select.Root>
 					</div>
 				</div>
 
