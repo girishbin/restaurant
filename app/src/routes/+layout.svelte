@@ -1,6 +1,7 @@
 <script>
 	import '../app.css';
 	import { Button } from '$lib/components/ui/button';
+	import { page } from '$app/stores';
 
 	import * as Sidebar from "$lib/components/ui/sidebar/index.js";
     import AppSidebar from "$lib/components/sideBar/app-sidebar.svelte";
@@ -10,10 +11,15 @@
 	// Determine the home URL based on the user's role.
 	// Admins go to the /admin dashboard, others go to the homepage.
 	const homeUrl = data.user?.role === 'admin' ? '/admin' : '/';
+
+	// Check if current route is login page
+	const isLoginPage = $derived($page.url.pathname === '/login');
 </script>
 
-<div class="grid grid-rows-[auto_1fr] h-screen w-screen overflow-hidden">
-	<header class="p-4 bg-gradient-to-r from-primary/20 to-primary/40 border-b flex justify-between items-center z-10">
+<!-- Single flex container for the entire app -->
+<div class="flex flex-col h-screen w-screen ">
+	<!-- Header - fixed height -->
+	<header class="flex-shrink-0 p-4 bg-gradient-to-r from-primary/20 to-primary/40 border-b flex justify-between items-center z-50">
 		<div class="flex items-center gap-6">
 			<a href={homeUrl} aria-label="Back to homepage">
 				<img src="/logo.svg" alt="Logo" class="w-24 h-24 rounded-full" />
@@ -32,17 +38,34 @@
 		{/if}
 	</header>
 
-	<div class="relative flex overflow-hidden">
-		<Sidebar.Provider>
-			<AppSidebar />
-			<main class="relative z-20 flex-1 overflow-y-auto p-4">
-				<Sidebar.Trigger />
+	<!-- Main content area - takes remaining height -->
+	<div class="flex-1 flex min-h-0 relative">
+		{#if isLoginPage}
+			<!-- Login page without sidebar -->
+			<main class="flex-1 p-6 overflow-auto">
 				{@render children?.()}
 			</main>
-		</Sidebar.Provider>
+		{:else}
+			<!-- Regular pages with sidebar -->
+			<Sidebar.Provider>
+				<!-- Sidebar -->
+				<div class="relative z-40">
+					<AppSidebar user={data.user} />
+				</div>
+				
+				<!-- Main content - takes remaining width -->
+				<div class="flex-1 flex flex-col min-w-0 relative z-10">
+					<!-- Sidebar trigger -->
+					<div class="p-4 border-b">
+						<Sidebar.Trigger />
+					</div>
+					
+					<!-- Page content - scrollable -->
+					<main class="flex-1 p-6 overflow-auto">
+						{@render children?.()}
+					</main>
+				</div>
+			</Sidebar.Provider>
+		{/if}
 	</div>
 </div>
-
-<!-- <main>
-	{@render children()}
-</main> -->

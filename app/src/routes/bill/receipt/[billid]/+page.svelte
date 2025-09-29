@@ -7,7 +7,7 @@
 	}
 </script>
 
-<div class="flex flex-col items-center justify-center min-h-screen p-4 text-center">
+<div class="w-full max-w-md mx-auto">
 	<div class="w-full max-w-md p-6 bg-white rounded-lg shadow-md dark:bg-gray-800 text-left font-mono print-container">
 		<!-- This is the printable invoice content -->
 		<div class="invoice-content">

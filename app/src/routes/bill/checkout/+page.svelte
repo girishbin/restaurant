@@ -12,7 +12,7 @@
 	let submitting = $state(false);
 
 	const cart = getContext('cart');
-	const tableNumber = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+	const tableNumber = [0, 1 , 2, 3, 4, 5, 6, 7, 8, 9, 10];
 	let selectedTableNumber = $state('');
 
 	// With Svelte 5 runes, we can create derived state for the form
@@ -33,7 +33,7 @@
 	const gstAmount = $derived(cart.totalPrice * 0.05);
 </script>
 
-<div class="flex flex-col items-center justify-center min-h-screen p-4 text-center">
+<div class="w-full max-w-4xl mx-auto pb-16">
 	{#if false && form?.success && form.bill}
 		<!-- Printable Bill screen -->
 		<div class="w-full max-w-md p-6 bg-white rounded-lg shadow-md dark:bg-gray-800 text-left font-mono printable-bill">
