@@ -1,88 +1,32 @@
 <script lang="ts">
-	import {
-		BarChart,
-		ClipboardPenLine,
-		LogOut,
-		UsersRound,
-		NotebookTabs,
-		ChevronRight
-	} from 'lucide-svelte';
+	import { ChevronRight } from 'lucide-svelte';
+	import { page } from '$app/stores';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import * as Collapsible from '$lib/components/ui/collapsible/index.js';
+	import { allItems } from './menu-items';
 
 	let { user } = $props();
-
-	// Define all possible menu items with the roles that can see them.
-	const allItems = [
-		{
-			title: 'Make Bill',
-			icon: ClipboardPenLine,
-			roles: ['admin', 'user'], // Accessible to all logged-in users
-			children: [
-				{
-					title: 'All Items',
-					url: '/bill',
-					roles: ['admin', 'user']
-				},
-				{
-					title: 'Paranthas',
-					url: '/bill?category=Paranthas',
-					roles: ['admin', 'user']
-				},
-				{
-					title: 'Parazzas',
-					url: '/bill?category=Parazzas',
-					roles: ['admin', 'user']
-				},
-				{
-					title: 'Rolls',
-					url: '/bill?category=Rolls',
-					roles: ['admin', 'user']
-				},
-				{
-					title: 'Sandwiches',
-					url: '/bill?category=Sandwiches',
-					roles: ['admin', 'user']
-				}
-			]
-		},
-		{
-			title: 'Recent Orders',
-			url: '/bill/recent',
-			icon: NotebookTabs,
-			roles: ['admin', 'user'] // Accessible to all logged-in users
-		},
-		{
-			title: 'View Reports',
-			url: '/admin/reports',
-			icon: BarChart,
-			roles: ['admin'] // Accessible only to admins
-		},
-		{
-            title: 'Users',
-            url: '/admin/users',
-            icon: UsersRound,
-            roles: ['admin']
-        },
-        {
-            title: 'Logout',
-            url: '/login?/logout',
-            icon: LogOut,
-            roles: ['admin', 'user']
-        }
-	];
 
 	// Filter the items based on the current user's role.
 	// If no user is logged in, the sidebar will be empty.
 	const visibleItems = $derived(
 		user ? allItems.filter((item) => item.roles.includes(user.role)) : []
 	);
+
+	// Reactive function to check if a parent menu item is active
+	const isParentActive = (item) => {
+		if (!item.children) return false;
+		// A parent is active if the current path starts with the path of any of its children.
+		// This handles both '/bill' and '/bill?category=...'
+		const childBaseUrl = item.children[0]?.url.split('?')[0];
+		return $page.url.pathname === childBaseUrl;
+	};
 </script>
 
 <Sidebar.Root class="!absolute !h-full">
 	<Sidebar.Content>
 		<Sidebar.Group>
-			<Sidebar.GroupLabel>Application</Sidebar.GroupLabel>
+			<Sidebar.GroupLabel>Menu</Sidebar.GroupLabel>
 			<Sidebar.GroupContent>
 				<Sidebar.Menu>
 					{#each visibleItems as item (item.title)}
@@ -90,7 +34,11 @@
 							<Collapsible.Root class="w-full">
 								<Sidebar.MenuItem>
 									<Collapsible.Trigger class="w-full">
-										<Sidebar.MenuButton class="[&>div]:hidden">
+										<Sidebar.MenuButton
+											class={isParentActive(item)
+												? 'bg-primary text-primary-foreground hover:bg-primary [&>div]:hidden'
+												: '[&>div]:hidden'}
+										>
 											{#snippet child({ props })}
 												<div {...props}>
 													<item.icon />
@@ -106,14 +54,28 @@
 								<Collapsible.Content>
 									<Sidebar.Menu>
 										{#each item.children as subItem (subItem.title)}
-											<a href={subItem.url} class="pl-10">{subItem.title}</a>
+											<a href={subItem.url} class="block pl-10 py-1.5 text-sm">
+												<span
+													class="rounded-md px-2 py-1"
+													class:bg-primary={$page.url.pathname + $page.url.search ===
+														subItem.url}
+													class:text-primary-foreground={$page.url.pathname + $page.url.search ===
+														subItem.url}
+												>
+													{subItem.title}
+												</span>
+											</a>
 										{/each}
 									</Sidebar.Menu>
 								</Collapsible.Content>
 							</Collapsible.Root>
 						{:else}
 							<Sidebar.MenuItem>
-								<Sidebar.MenuButton>
+								<Sidebar.MenuButton
+									class={item.url && $page.url.pathname.startsWith(item.url)
+										? 'bg-primary text-primary-foreground hover:bg-primary'
+										: ''}
+								>
 									{#snippet child({ props })}
 										<a href={item.url} {...props}>
 											<item.icon />
