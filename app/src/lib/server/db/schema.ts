@@ -35,6 +35,7 @@ export const bills = sqliteTable('bills', {
 	discountAmount: real('discount_amount').default(0),
 	finalAmount: real('final_amount').notNull(),
 	tableNumber: integer('table_number').notNull(),
+	orderStatus: text('order_status', { enum: ['new', 'served'] }).default('new').notNull(),
 	paymentStatus: text('payment_status', { length: 20 }).default('pending'), // pending, paid, cancelled
 	paymentMethod: text('payment_method', { length: 20 }), // cash, card, upi, etc.
 	createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),

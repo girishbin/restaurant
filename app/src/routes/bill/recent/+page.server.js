@@ -1,5 +1,6 @@
 import { bills } from '$lib/server/db/schema';
-import { desc } from 'drizzle-orm';
+import { desc, eq } from 'drizzle-orm';
+import { fail } from '@sveltejs/kit';
 
 export const load = async ({ locals }) => {
 	const { db } = locals;
@@ -18,4 +19,27 @@ export const load = async ({ locals }) => {
 	return {
 		bills: recentBills
 	};
+};
+
+export const actions = {
+	markAsServed: async ({ request, locals }) => {
+		const { db } = locals;
+		const formData = await request.formData();
+		const billId = formData.get('billId');
+
+		if (!billId || typeof billId !== 'string') {
+			return fail(400, { message: 'Invalid Bill ID' });
+		}
+
+		try {
+			await db
+				.update(bills)
+				.set({ orderStatus: 'served' })
+				.where(eq(bills.id, billId));
+
+			return { success: true, servedBillId: billId };
+		} catch (error) {
+			return fail(500, { message: 'Failed to update order status.' });
+		}
+	}
 };

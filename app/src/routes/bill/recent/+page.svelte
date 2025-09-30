@@ -3,8 +3,10 @@
 	import { navigating } from '$app/stores';
 	import { Progress } from '$lib/components/ui/progress/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';
+	import { enhance } from '$app/forms';
+	import { CheckCircle2 } from 'lucide-svelte';
 
-	let { data } = $props();
+	let { data, form } = $props();
 </script>
 
 <div class="container mx-auto py-10">
@@ -21,10 +23,14 @@
 	{#if data.bills.length > 0}
 		<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
 			{#each data.bills as bill (bill.id)}
-				<Card.Root>
+				{@const isServed = bill.orderStatus === 'served' || form?.servedBillId === bill.id}
+				<Card.Root class={isServed ? 'bg-muted/50' : ''}>
 					<Card.Header>
 						<Card.Title class="flex justify-between items-baseline">
-							<span>Table: {bill.tableNumber}</span>
+							<span class="flex items-center gap-2">
+								Table: {bill.tableNumber}
+								{#if isServed}<CheckCircle2 class="h-5 w-5 text-green-500" />{/if}
+							</span>
 							<a
 								href={`/bill/receipt/${bill.id}`}
 								target="_blank"
@@ -45,6 +51,14 @@
 							{/each}
 						</ul>
 					</Card.Content>
+					{#if !isServed}
+						<Card.Footer>
+							<form method="POST" action="?/markAsServed" use:enhance class="w-full">
+								<input type="hidden" name="billId" value={bill.id} />
+								<Button type="submit" class="w-full">Mark as Served</Button>
+							</form>
+						</Card.Footer>
+					{/if}
 				</Card.Root>
 			{/each}
 		</div>

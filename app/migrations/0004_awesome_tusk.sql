@@ -1,0 +1,1 @@
+ALTER TABLE `bills` ADD `order_status` text DEFAULT 'new' NOT NULL;
