@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { BarChart, ClipboardPenLine, LogOut, UsersRound } from 'lucide-svelte';
+	import { BarChart, ClipboardPenLine, LogOut, UsersRound, NotebookTabs } from 'lucide-svelte';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 
 	let { user } = $props();
@@ -13,12 +13,18 @@
 			roles: ['admin', 'user'] // Accessible to all logged-in users
 		},
 		{
+			title: 'Recent Orders',
+			url: '/bill/recent',
+			icon: NotebookTabs,
+			roles: ['admin', 'user'] // Accessible to all logged-in users
+		},
+		{
 			title: 'View Reports',
 			url: '/admin/reports',
 			icon: BarChart,
 			roles: ['admin'] // Accessible only to admins
 		},
-        {
+		{
             title: 'Users',
             url: '/admin/users',
             icon: UsersRound,
