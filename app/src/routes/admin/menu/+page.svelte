@@ -8,7 +8,9 @@
 	import { Badge } from '$lib/components/ui/badge/index.js';
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
+	import { Toaster, toast } from 'svelte-sonner';
 	import type { MenuItemSelect } from '$lib/server/db/schema';
+	import { ArrowUpDown, ArrowDown, ArrowUp } from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button';
 
 	let {
@@ -83,6 +85,7 @@
 	}
 </script>
 
+<Toaster />
 <h1 class="text-2xl font-bold mb-4">Add New Menu Item</h1>
 <form
 	method="POST"
@@ -98,6 +101,7 @@
 				category = '';
 				imageUrl = '';
 				isActive = true;
+				toast.success('Menu item created successfully!');
 			}
 		};
 	}}
@@ -208,25 +212,54 @@
 		<Table.Root>
 			<Table.Header>
 				<Table.Row>
-					<Table.Head class="w-[200px]">
-						<a href={getSortLink('name')}>Name</a>
-						{#if data.sortBy === 'name'}
-							<span>{data.sortOrder === 'asc' ? '▲' : '▼'}</span>
-						{/if}
+					<Table.Head class="w-[250px]">
+						<a href={getSortLink('name')} class="flex items-center gap-2">
+							Name
+							{#if data.sortBy !== 'name'}
+								<ArrowUpDown class="h-4 w-4 text-muted-foreground" />
+							{:else if data.sortOrder === 'asc'}
+								<ArrowUp class="h-4 w-4" />
+							{:else}
+								<ArrowDown class="h-4 w-4" />
+							{/if}
+						</a>
 					</Table.Head>
 					<Table.Head>
-						<a href={getSortLink('category')}>Category</a>
-						{#if data.sortBy === 'category'}
-							<span>{data.sortOrder === 'asc' ? '▲' : '▼'}</span>
-						{/if}
+						<a href={getSortLink('category')} class="flex items-center gap-2">
+							Category
+							{#if data.sortBy !== 'category'}
+								<ArrowUpDown class="h-4 w-4 text-muted-foreground" />
+							{:else if data.sortOrder === 'asc'}
+								<ArrowUp class="h-4 w-4" />
+							{:else}
+								<ArrowDown class="h-4 w-4" />
+							{/if}
+						</a>
 					</Table.Head>
 					<Table.Head class="text-right">
-						<a href={getSortLink('price')}>Price</a>
-						{#if data.sortBy === 'price'}
-							<span>{data.sortOrder === 'asc' ? '▲' : '▼'}</span>
-						{/if}
+						<a href={getSortLink('price')} class="flex items-center justify-end gap-2">
+							Price
+							{#if data.sortBy !== 'price'}
+								<ArrowUpDown class="h-4 w-4 text-muted-foreground" />
+							{:else if data.sortOrder === 'asc'}
+								<ArrowUp class="h-4 w-4" />
+							{:else}
+								<ArrowDown class="h-4 w-4" />
+							{/if}
+						</a>
 					</Table.Head>
-					<Table.Head class="text-center">Status</Table.Head>
+					<Table.Head class="text-center">
+						<a href={getSortLink('isActive')} class="flex items-center justify-center gap-2">
+							Status
+							{#if data.sortBy !== 'isActive'}
+								<ArrowUpDown class="h-4 w-4 text-muted-foreground" />
+							{:else if data.sortOrder === 'asc'}
+								<ArrowUp class="h-4 w-4" />
+							{:else}
+								<ArrowDown class="h-4 w-4" />
+							{/if}
+						</a>
+					</Table.Head>
 					<Table.Head class="text-right">Actions</Table.Head>
 				</Table.Row>
 			</Table.Header>
@@ -296,6 +329,7 @@
 
 						if (result.type === 'success' && result.status === 200) {
 							editingItem = null; // Close dialog on success
+							toast.success('Menu item updated successfully!');
 						} else if (result.type === 'failure') {
 							editForm = result.data;
 						} else {
@@ -388,9 +422,12 @@
 				method="POST"
 				action="?/delete"
 				use:enhance={() => {
-					return async ({ update }) => {
+					return async ({ result, update }) => {
 						await update();
-						deletingItem = null;
+						if (result.type === 'success' && result.status === 200) {
+							deletingItem = null;
+							toast.success('Menu item deleted successfully!');
+						}
 					};
 				}}
 			>

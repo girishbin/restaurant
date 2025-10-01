@@ -25,7 +25,7 @@ export const load = async ({ locals, url }) => {
 	}
 
 	// Define valid sortable columns to prevent arbitrary column sorting
-	const validSortColumns = ['name', 'category', 'price', 'createdAt'];
+	const validSortColumns = ['name', 'category', 'price', 'createdAt', 'isActive'];
 	const sortColumn = validSortColumns.includes(sortBy) ? sortBy : 'createdAt';
 	const orderFunction = sortOrder === 'asc' ? asc : desc;
 
