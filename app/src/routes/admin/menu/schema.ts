@@ -6,7 +6,8 @@ export const categories = [
 	'Raita',
 	'Sandwiches',
 	'Rolls',
-	'Beverages'
+	'Beverages',
+	'Rice-bowls'
 ] as const;
 
 export const formSchema = z.object({

@@ -15,7 +15,7 @@ export const users = sqliteTable('users', {
 export const menuItems = sqliteTable('menu_items', {
 	id: integer('id').primaryKey({ autoIncrement: true }),
 	name: text('name', { length: 100 }).notNull(),
-  description: text('description'),
+    description: text('description'),
 	price: real('price').notNull(),
 	category: text('category', { length: 50 }), // e.g., 'food', 'beverage', 'dessert'
 	imageUrl: text('image_url', { length: 255 }),

@@ -131,7 +131,7 @@
 				id="price"
 				name="price"
 				type="number"
-				step="0.01"
+				step="5"
 				bind:value={price}
 				required
 			/>
@@ -361,7 +361,7 @@
 							id="edit-price"
 							name="price"
 							type="number"
-							step="0.01"
+							step="5"
 							bind:value={editPrice}
 							required
 						/>

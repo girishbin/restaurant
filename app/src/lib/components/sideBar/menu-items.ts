@@ -29,6 +29,11 @@ export const allItems = [
 				roles: ['admin', 'user']
 			},
 			{
+				title: 'Rice-bowls',
+				url: '/bill?category=Rice-bowls',
+				roles: ['admin', 'user']
+			},
+			{
 				title: 'Sandwiches',
 				url: '/bill?category=Sandwiches',
 				roles: ['admin', 'user']
