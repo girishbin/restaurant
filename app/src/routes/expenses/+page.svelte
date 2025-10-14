@@ -220,9 +220,13 @@
 				</div>
 			</div>
 			<Dialog.Footer>
-				<Button type="button" variant="outline" on:click={() => (editDialogOpen = false)}>
+				<!-- Normal button is used here -->
+				<button
+					type="button"
+					class="inline-flex h-10 items-center justify-center whitespace-nowrap rounded-md border border-input bg-background px-4 py-2 text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+					on:click={() => (editDialogOpen = false)}>
 					Cancel
-				</Button>
+				</button>
 				<Button type="submit">Save Changes</Button>
 			</Dialog.Footer>
 		</form>
@@ -245,9 +249,9 @@
 				id="delete-form"
 				method="POST"
 				action="?/deleteExpense"
-				use:enhance={() => {
-					return async ({ result }) => {
-						await applyAction(result);
+				use:enhance={({ form, data, action, cancel, submitter }) => {
+					return async ({ result, update }) => {
+						await update();
 						if (result.type === 'success') {
 							deleteDialogOpen = false;
 						}
