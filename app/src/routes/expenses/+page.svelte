@@ -48,6 +48,8 @@
 			toast.error(form.message);
 		}
 	}
+
+	const todayString = new Date().toISOString().split('T')[0];
 </script>
 
 <div class="w-full max-w-4xl mx-auto p-4 md:p-8 space-y-8">
@@ -66,13 +68,16 @@
 					return async ({ result, update }) => {
 						await update();
 						if (result.type === 'success' && result.status === 200) {
-							document.getElementById('add-expense-form')?.reset();
+							// Manually reset the form fields to clear them
+							const formElement = document.getElementById('add-expense-form');
+							if (formElement) formElement.reset();
+							// Explicitly set the date input back to today's date
+							document.getElementById('expenseDate').value = todayString;
 						}
 					};
 				}}
 				class="space-y-6"
 			>
-
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 					<div class="space-y-2">
 						<Label for="name">Name</Label>
@@ -92,7 +97,7 @@
 
 					<div class="space-y-2">
 						<Label for="expenseDate">Date</Label>
-						<Input type="date" name="expenseDate" id="expenseDate" value={form?.data?.expenseDate ?? ''} />
+						<Input type="date" name="expenseDate" id="expenseDate" value={form?.data?.expenseDate ?? todayString} />
 						{#if form?.errors?.expenseDate}
 							<p class="text-sm text-destructive">{form.errors.expenseDate[0]}</p>
 						{/if}
@@ -118,14 +123,15 @@
 			<CardTitle>Expense History</CardTitle>
 		</CardHeader>
 		<CardContent>
-			<Table>
-				<TableHeader>
+			<!-- Desktop Table View -->
+			<Table class="hidden md:table">
+				<TableHeader >
 					<TableRow>
 						<TableHead>Name</TableHead>
 						<TableHead>Category</TableHead>
 						<TableHead class="text-right">Amount</TableHead>
 						<TableHead class="text-right">Date</TableHead>
-						<TableHead class="text-right w-[100px]">Actions</TableHead>
+						<TableHead class="text-right w-[120px]">Actions</TableHead>
 					</TableRow>
 				</TableHeader>
 				<TableBody>
@@ -135,10 +141,10 @@
 							<TableCell>{expense.category || 'N/A'}</TableCell>
 							<TableCell class="text-right">₹{expense.amount.toFixed(2)}</TableCell>
 							<TableCell class="text-right">{new Date(expense.expenseDate).toLocaleDateString()}</TableCell>
-							<TableCell class="text-right w-[100px]">
+							<TableCell class="text-right">
 								<div class="flex items-center justify-end space-x-2">
 									<button
-										class="h-8 w-8 text-blue-600 hover:text-blue-800"
+										class="flex h-8 w-8 items-center justify-center text-blue-600 hover:text-blue-800"
 										on:click={() => {
 											editingExpense = expense;
 											editDialogOpen = true;
@@ -147,7 +153,7 @@
 										<Pencil class="h-4 w-4" />
 									</button>
 									<button
-										class="h-8 w-8 text-destructive hover:text-red-700"
+										class="flex h-8 w-8 items-center justify-center text-destructive hover:text-red-700"
 										on:click={() => {
 											deletingExpense = expense;
 											deleteDialogOpen = true;
@@ -161,6 +167,40 @@
 					{/each}
 				</TableBody>
 			</Table>
+
+			<!-- Mobile Card View -->
+			<div class="space-y-4 md:hidden">
+				{#each data.expenses as expense}
+					<div class="rounded-lg border bg-card p-4 text-card-foreground shadow-sm">
+						<div class="flex items-start justify-between">
+							<div>
+								<p class="font-semibold">{expense.name}</p>
+								<p class="text-sm text-muted-foreground">{expense.category || 'N/A'}</p>
+								<p class="text-sm text-muted-foreground">{new Date(expense.expenseDate).toLocaleDateString()}</p>
+							</div>
+							<p class="text-lg font-bold">₹{expense.amount.toFixed(2)}</p>
+						</div>
+						<div class="mt-4 flex justify-end space-x-2 border-t pt-4">
+							<button
+								type="button"
+								class="inline-flex h-9 items-center justify-center whitespace-nowrap rounded-md border border-input bg-background px-3 text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+								on:click={() => {
+									editingExpense = expense;
+									editDialogOpen = true;
+								}}>Edit</button
+							>
+							<button
+								type="button"
+								class="inline-flex h-9 items-center justify-center whitespace-nowrap rounded-md bg-destructive px-3 text-sm font-medium text-destructive-foreground ring-offset-background transition-colors hover:bg-destructive/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+								on:click={() => {
+									deletingExpense = expense;
+									deleteDialogOpen = true;
+								}}>Delete</button
+							>
+						</div>
+					</div>
+				{/each}
+			</div>
 		</CardContent>
 	</Card>
 </div>

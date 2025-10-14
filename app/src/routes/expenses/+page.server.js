@@ -51,11 +51,19 @@ export const actions = {
 
 		try {
 			const { name, amount, category, expenseDate, description } = validation.data;
+
+			// Check if the submitted date is today. If so, use the current time.
+			// Otherwise, use the date provided (which will be at midnight).
+			const today = new Date();
+			const submittedDate = new Date(expenseDate);
+			const finalExpenseDate =
+				new Date(expenseDate).toDateString() === today.toDateString() ? today : submittedDate;
+
 			await db.insert(expenses).values({
 				name,
 				amount,
 				category: category || null,
-				expenseDate: new Date(expenseDate),
+				expenseDate: finalExpenseDate,
 				description: description || null
 			});
 			return { success: true, message: 'Expense added successfully!' };
