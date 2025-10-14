@@ -1,4 +1,4 @@
-import { sqliteTable, AnySQLiteColumn, integer, text, real, foreignKey, uniqueIndex, numeric } from "drizzle-orm/sqlite-core"
+import { sqliteTable, AnySQLiteColumn, integer, text, real, foreignKey, uniqueIndex } from "drizzle-orm/sqlite-core"
   import { sql } from "drizzle-orm"
 
 export const menuItems = sqliteTable("menu_items", {
@@ -25,24 +25,6 @@ export const billItems = sqliteTable("bill_items", {
 	createdAt: integer("created_at").default(sql`(strftime('%s', 'now'))`),
 });
 
-export const bills = sqliteTable("bills", {
-	id: text().primaryKey().notNull(),
-	billNumber: text("bill_number", { length: 50 }).notNull(),
-	customerName: text("customer_name", { length: 100 }),
-	customerPhone: text("customer_phone", { length: 20 }),
-	totalAmount: real("total_amount").notNull(),
-	taxAmount: real("tax_amount"),
-	discountAmount: real("discount_amount"),
-	finalAmount: real("final_amount").notNull(),
-	paymentStatus: text("payment_status", { length: 20 }).default("pending"),
-	paymentMethod: text("payment_method", { length: 20 }),
-	createdAt: integer("created_at").default(sql`(strftime('%s', 'now'))`),
-	updatedAt: integer("updated_at").default(sql`(strftime('%s', 'now'))`),
-},
-(table) => [
-	uniqueIndex("bills_bill_number_unique").on(table.billNumber),
-]);
-
 export const users = sqliteTable("users", {
 	id: integer().primaryKey({ autoIncrement: true }).notNull(),
 	username: text({ length: 100 }).notNull(),
@@ -55,9 +37,23 @@ export const users = sqliteTable("users", {
 	uniqueIndex("users_username_unique").on(table.username),
 ]);
 
-export const d1Migrations = sqliteTable("d1_migrations", {
-	id: integer().primaryKey({ autoIncrement: true }),
-	name: text(),
-	appliedAt: numeric("applied_at").default(sql`(CURRENT_TIMESTAMP)`).notNull(),
-});
+export const bills = sqliteTable("bills", {
+	id: text().primaryKey().notNull(),
+	billNumber: text("bill_number", { length: 50 }).notNull(),
+	customerName: text("customer_name", { length: 100 }),
+	customerPhone: text("customer_phone", { length: 20 }),
+	totalAmount: real("total_amount").notNull(),
+	taxAmount: real("tax_amount"),
+	discountAmount: real("discount_amount"),
+	finalAmount: real("final_amount").notNull(),
+	tableNumber: integer("table_number").notNull(),
+	orderStatus: text("order_status").default("new").notNull(),
+	paymentStatus: text("payment_status", { length: 20 }).default("pending"),
+	paymentMethod: text("payment_method", { length: 20 }),
+	createdAt: integer("created_at").default(sql`(strftime('%s', 'now'))`),
+	updatedAt: integer("updated_at").default(sql`(strftime('%s', 'now'))`),
+},
+(table) => [
+	uniqueIndex("bills_bill_number_unique").on(table.billNumber),
+]);
 

@@ -75,6 +75,15 @@ export const billItemsRelations = relations(billItems, ({ one }) => ({
   })
 }));
 
+export const expenses = sqliteTable("expenses", {
+	id: integer('id').primaryKey({ autoIncrement: true }),
+	name: text('name', { length: 100 }).notNull(),
+	amount: real('amount').notNull(),
+	category: text('category', { length: 50 }),
+	expenseDate: integer('expense_date', { mode: 'timestamp' }).notNull(),
+	description: text('description'),
+	createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
+});
 // Export types for TypeScript
 
 export type UserInsert = typeof users.$inferInsert;
@@ -88,3 +97,6 @@ export type BillSelect = typeof bills.$inferSelect;
 
 export type BillItemInsert = typeof billItems.$inferInsert;
 export type BillItemSelect = typeof billItems.$inferSelect;
+
+export type ExpenseInsert = typeof expenses.$inferInsert;
+export type ExpenseSelect = typeof expenses.$inferSelect;

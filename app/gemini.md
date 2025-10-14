@@ -16,4 +16,10 @@
 - TailwindCSS
 - SvelteKit
 
-
+** Must Use **
+- While calling a database always access the database connection using locals which is attached to the request lifecyle.
+  Example:
+     export const load = async ({ locals }) => {
+  	 const { db } = locals;
+         }
+- Always use normal <button> while using or working with 'AlertDialog' shadcn component.

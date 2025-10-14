@@ -1,4 +1,4 @@
-import { BarChart, ClipboardPenLine, LogOut, NotebookTabs, UsersRound, CookingPot } from 'lucide-svelte';
+import { BarChart, Banknote, ClipboardPenLine, LogOut, NotebookTabs, UsersRound, CookingPot } from 'lucide-svelte';
 
 
 // Define all possible menu items with the roles that can see them.
@@ -56,6 +56,12 @@ export const allItems = [
 		url: '/admin/menu',
 		icon: CookingPot,
 		roles: ['admin'] // Accessible only to admins
+	},
+	{
+		title: 'Expenses',
+		url: '/expenses',
+		icon: Banknote,
+		roles: ['admin','user'] // Accessible only to admins
 	},
 	{
 		title: 'View Reports',
