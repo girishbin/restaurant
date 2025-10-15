@@ -1,5 +1,5 @@
 import { sqliteTable, integer, text, real } from 'drizzle-orm/sqlite-core';
-import { relations, sql } from 'drizzle-orm';
+import { Name, relations, sql } from 'drizzle-orm';
 
 // Simple auth user table
 export const users = sqliteTable('users', {
@@ -84,6 +84,16 @@ export const expenses = sqliteTable("expenses", {
 	description: text('description'),
 	createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
 });
+
+export const settings = sqliteTable("settings", {
+	id: integer('id').primaryKey({ autoIncrement: true }),
+	cafeName: text('cafe_name', { length: 100 }).notNull(),
+	cafeAddress: text('cafe_address'),
+	cafePhone: text('cafe_phone', { length: 20 }),
+	createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
+	updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
+});
+
 // Export types for TypeScript
 
 export type UserInsert = typeof users.$inferInsert;
@@ -100,3 +110,6 @@ export type BillItemSelect = typeof billItems.$inferSelect;
 
 export type ExpenseInsert = typeof expenses.$inferInsert;
 export type ExpenseSelect = typeof expenses.$inferSelect;
+
+export type SettingInsert = typeof settings.$inferInsert;
+export type SettingSelect = typeof settings.$inferSelect;
