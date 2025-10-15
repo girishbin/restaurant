@@ -7,7 +7,8 @@ import { z } from 'zod';
 const settingsSchema = zfd.formData({
 	cafeName: zfd.text(z.string().min(1, 'Cafe name is required')),
 	cafeAddress: zfd.text(z.string().optional()),
-	cafePhone: zfd.text(z.string().optional())
+	cafePhone: zfd.text(z.string().optional()),
+	cafeLicense: zfd.text(z.string().optional())
 });
 
 /** @type {import('./$types').PageServerLoad} */
@@ -36,15 +37,15 @@ export const actions = {
 		}
 
 		try {
-			const { cafeName, cafeAddress, cafePhone } = validation.data;
+			const { cafeName, cafeAddress, cafePhone, cafeLicense } = validation.data;
 			const currentSettings = await db.select().from(settings).limit(1);
 
 			if (currentSettings.length > 0) {
 				// If settings exist, update them
-				await db.update(settings).set({ cafeName, cafeAddress, cafePhone });
+				await db.update(settings).set({ cafeName, cafeAddress, cafePhone, cafeLicense });
 			} else {
 				// If no settings exist, insert a new record
-				await db.insert(settings).values({ cafeName, cafeAddress, cafePhone });
+				await db.insert(settings).values({ cafeName, cafeAddress, cafePhone, cafeLicense });
 			}
 
 			return { success: true, message: 'Settings updated successfully!' };

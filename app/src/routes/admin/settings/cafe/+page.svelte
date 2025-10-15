@@ -76,6 +76,16 @@
 					/>
 				</div>
 
+				<div class="space-y-2">
+					<Label for="cafeLicense">FSSAI / License Number</Label>
+					<Input
+						id="cafeLicense"
+						name="cafeLicense"
+						placeholder="Your Cafe's License Number"
+						value={data.settings?.cafeLicense ?? ''}
+					/>
+				</div>
+
 				<Button type="submit" class="w-full">Save Settings</Button>
 			</form>
 		</CardContent>

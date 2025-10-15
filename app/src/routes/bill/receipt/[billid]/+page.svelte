@@ -1,7 +1,7 @@
 <script>
 	import { Button } from '$lib/components/ui/button/index.js';
 	let { data } = $props();
-	const { bill } = data;
+	const { bill, settings } = data;
 	function handlePrint() {
 		window.print();
 	}
@@ -12,12 +12,25 @@
 		<!-- This is the printable invoice content -->
 		<div class="invoice-content">
 			<div class="text-center mb-6">
-				<h2 class="text-2xl font-bold">INVOICE</h2>
-				<p class="text-sm">Bill No: {bill.billNumber}</p>
-				<p class="text-sm">Date: {new Date(bill.createdAt).toLocaleString()}</p>
-				<p class="text-sm capitalize">Payment: {bill.paymentMethod}</p>
-				{#if bill.tableNumber}<p class="text-sm">Table No: {bill.tableNumber}</p>{/if}
+				<h1 class="text-2xl font-bold font-serif text-gray-900">{settings.cafeName}</h1>
+				<p class="text-sm text-gray-600">{settings.cafeAddress}</p>
+				<div class="text-xs text-gray-600">
+					{#if settings.cafePhone}<span>Phone: {settings.cafePhone}</span>{/if}
+					{#if settings.cafePhone && settings.cafeLicense}<span class="mx-1">|</span>{/if}
+					{#if settings.cafeLicense}<span>FSSAI: {settings.cafeLicense}</span>{/if}
+				</div>
 			</div>
+			<div class="text-xs mb-4">
+				<div class="flex justify-between">
+					<span>{bill.billNumber}</span>
+					<span>Date: {new Date(bill.createdAt).toLocaleString()}</span>
+				</div>
+				<div class="flex justify-between">
+					<span class="capitalize">Payment: {bill.paymentMethod}</span>
+					{#if bill.tableNumber}<span>Table No: {bill.tableNumber}</span>{/if}
+				</div>
+			</div>
+			<div class="border-t border-dashed border-gray-400 my-8"></div>
 			{#if bill.customerName || bill.customerPhone}
 				<div class="mb-4">
 					<h3 class="font-bold border-b border-dashed border-gray-400 pb-1 mb-2">

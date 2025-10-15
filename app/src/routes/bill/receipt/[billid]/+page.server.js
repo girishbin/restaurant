@@ -1,24 +1,26 @@
-import { error } from '@sveltejs/kit';
-import { eq } from 'drizzle-orm';
 import { bills } from '$lib/server/db/schema';
+import { eq } from 'drizzle-orm';
 
-/** @type {import('./$types').PageServerLoad} */
-export async function load({ params, locals }) {
+export const load = async ({ params, locals }) => {
+	const billId = params.billid;
 	const { db } = locals;
-	// Correctly extract the 'billid' parameter and assign it to the 'billId' variable.
-	const { billid: billId } = params;
 
-	// Fetch the bill and its associated items using a relational query
+	// Fetch the bill with its items
 	const bill = await db.query.bills.findFirst({
 		where: eq(bills.id, billId),
 		with: {
-			billItems: true // This uses the relation defined in your schema.ts
+			billItems: {
+				with: {
+					menuItem: true
+				}
+			}
 		}
 	});
 
-	if (!bill) {
-		throw error(404, 'Bill not found');
-	}
+	const cafeSettings = await db.query.settings.findFirst();
 
-	return { bill };
-}
+	return {
+		bill,
+		settings: cafeSettings
+	};
+};

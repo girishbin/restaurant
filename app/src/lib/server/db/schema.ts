@@ -90,6 +90,7 @@ export const settings = sqliteTable("settings", {
 	cafeName: text('cafe_name', { length: 100 }).notNull(),
 	cafeAddress: text('cafe_address'),
 	cafePhone: text('cafe_phone', { length: 20 }),
+	cafeLicense: text('cafe_license'),
 	createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
 	updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
 });

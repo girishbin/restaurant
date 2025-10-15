@@ -1,6 +1,6 @@
 import { BarChart, Banknote, ClipboardPenLine, LogOut, NotebookTabs, UsersRound, CookingPot, icons } from 'lucide-svelte';
 
-import { Building2, Cog } from 'lucide-svelte'; 
+import { Building2, Cog, ChartLine } from 'lucide-svelte'; 
 
 // Define all possible menu items with the roles that can see them.
 export const allItems = [
@@ -73,11 +73,13 @@ export const allItems = [
 			{
 				title: 'Sales',
 				url: '/admin/reports/sales',
+				icon: ChartLine,
 				roles: ['admin']
 			},
 			{
 				title: 'Expenses',
 				url: '/admin/reports/expenses',
+				icon: ChartLine,
 				roles: ['admin']
 			}
 		]

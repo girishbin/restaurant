@@ -1,0 +1,1 @@
+ALTER TABLE `settings` ADD `cafe_license` text;

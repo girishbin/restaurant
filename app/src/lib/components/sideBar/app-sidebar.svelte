@@ -59,9 +59,13 @@
 													class="rounded-md px-2 py-1"
 													class:bg-primary={$page.url.pathname + $page.url.search ===
 														subItem.url}
-													class:text-primary-foreground={$page.url.pathname + $page.url.search ===
+													class:text-primary-foreground={$page.url.pathname +
+														$page.url.search ===
 														subItem.url}
 												>
+													{#if subItem.icon}
+														<subItem.icon class="inline w-4 h-4 mr-2" />
+													{/if}
 													{subItem.title}
 												</span>
 											</a>
