@@ -1,16 +1,8 @@
 import { expenses } from '$lib/server/db/schema';
+import { and, desc, eq, gte, lte } from 'drizzle-orm';
 import { fail } from '@sveltejs/kit';
 import { z } from 'zod';
-import { eq, gte, desc } from 'drizzle-orm';
 import { zfd } from 'zod-form-data';
-
-const expenseSchema = zfd.formData({
-	name: zfd.text(z.string().min(1, 'Name is required')),
-	amount: zfd.numeric(z.number().positive('Amount must be positive')),
-	category: zfd.text(z.string().optional()),
-	expenseDate: zfd.text(z.string().min(1, 'Date is required')),
-	description: zfd.text(z.string().optional())
-});
 
 const editExpenseSchema = zfd.formData({
 	id: zfd.numeric(z.number().int().positive()),
@@ -25,65 +17,49 @@ const deleteExpenseSchema = zfd.formData({
 	id: zfd.numeric(z.number().int().positive())
 });
 
-export const load = async ({ locals }) => {
+/** @type {import('./$types').PageServerLoad} */
+export async function load({ locals, url }) {
 	const { db } = locals;
 
-	// Calculate the date for 3 days ago, set to the beginning of that day.
-	const threeDaysAgo = new Date();
-	threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
-	threeDaysAgo.setHours(0, 0, 0, 0);
+	const from = url.searchParams.get('from');
+	const to = url.searchParams.get('to');
 
-	const recentExpenses = await db
+	const conditions = [];
+
+	if (from) {
+		// The user selects a date like '2024-05-10'. We interpret this as the start of that day in IST.
+		// By appending the IST offset (+05:30), we create a timezone-aware date object.
+		// new Date('2024-05-10T00:00:00.000+05:30') correctly represents the start of the day in India.
+		const fromDate = new Date(`${from}T00:00:00.000+05:30`);
+		conditions.push(gte(expenses.expenseDate, fromDate));
+	}
+	if (to) {
+		// Similarly, we interpret the 'to' date as the end of that day in IST.
+		// new Date('2024-05-10T23:59:59.999+05:30') represents the end of the day in India.
+		// The Date object will automatically handle the conversion to its internal UTC representation for the query.
+		const toDate = new Date(`${to}T23:59:59.999+05:30`);
+		conditions.push(lte(expenses.expenseDate, toDate));
+	}
+
+	// Fetch expenses from the database, applying date filters if they exist.
+	const allExpenses = await db
 		.select()
 		.from(expenses)
-		.where(gte(expenses.expenseDate, threeDaysAgo))
+		.where(and(...conditions))
 		.orderBy(desc(expenses.expenseDate));
+
+	const totalAmount = allExpenses.reduce((sum, expense) => sum + Number(expense.amount), 0);
+
+	const totalExpenses = allExpenses.length;
+
 	return {
-		expenses: recentExpenses
+		expenses: allExpenses,
+		totalAmount: totalAmount,
+		totalExpenses: totalExpenses
 	};
-};
+}
 
 export const actions = {
-	addExpense: async ({ request, locals }) => {
-		const { db } = locals;
-		const formData = await request.formData();
-		const data = Object.fromEntries(formData);
-
-		const validation = expenseSchema.safeParse(formData);
-
-		if (!validation.success) {
-			const errors = validation.error.flatten().fieldErrors;
-			return fail(400, {
-				data,
-				errors
-			});
-		}
-
-		try {
-			const { name, amount, category, expenseDate, description } = validation.data;
-
-			// Check if the submitted date is today. If so, use the current time.
-			// Otherwise, use the date provided (which will be at midnight).
-			const today = new Date();
-			const submittedDate = new Date(expenseDate);
-			const finalExpenseDate =
-				new Date(expenseDate).toDateString() === today.toDateString() ? today : submittedDate;
-
-			await db.insert(expenses).values({
-				name,
-				amount,
-				category: category || null,
-				expenseDate: finalExpenseDate,
-				description: description || null
-			});
-			return { success: true, message: 'Expense added successfully!' };
-		} catch (error) {
-			// Log the actual error to the server console for debugging
-			console.error('Failed to add expense:', error);
-			return fail(500, { data, message: 'Could not add the expense.' });
-		}
-	},
-
 	editExpense: async ({ request, locals }) => {
 		const { db } = locals;
 		const formData = await request.formData();

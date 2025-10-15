@@ -67,7 +67,19 @@ export const allItems = [
 		title: 'View Reports',
 		url: '/admin/reports',
 		icon: BarChart,
-		roles: ['admin'] // Accessible only to admins
+		roles: ['admin'], // Accessible only to admins
+		children: [
+			{
+				title: 'Sales',
+				url: '/admin/reports/sales',
+				roles: ['admin']
+			},
+			{
+				title: 'Expenses',
+				url: '/admin/reports/expenses',
+				roles: ['admin']
+			}
+		]
 	},
 	{
 		title: 'Users',
