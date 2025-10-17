@@ -11,7 +11,7 @@ const checkoutSchema = zfd.formData({
 	customerName: zfd.text(z.string().optional()),
 	customerPhone: zfd.text(z.string().optional()),
 	paymentMethod: zfd.text(z.enum(['cash', 'card', 'upi'])),
-	tableNumber: zfd.numeric(z.number()),
+	tableNumber: zfd.numeric(z.number({ required_error: 'Please select a table number.' })),
 	items: zfd.json(
 		z.array(
 			z.object({

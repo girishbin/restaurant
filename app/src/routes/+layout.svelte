@@ -16,8 +16,12 @@
 	const isLoginPage = $derived($page.url.pathname === '/login');
 </script>
 
+<!-- This is a hidden container for content that needs to be printed. -->
+<div id="print-container" class="hidden print:block"></div>
+
 <!-- Single flex container for the entire app -->
-<div class="flex flex-col h-screen w-screen ">
+<!-- The main app view, which will be hidden during printing. -->
+<div class="flex flex-col h-screen w-screen print:hidden">
 	<!-- Header - fixed height -->
 	<header class="flex-shrink-0 p-4 bg-gradient-to-r from-primary/20 to-primary/40 border-b flex justify-between items-center z-50">
 		<div class="flex items-center gap-6">

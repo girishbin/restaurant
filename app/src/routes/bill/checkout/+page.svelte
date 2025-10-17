@@ -163,6 +163,9 @@
 							  {/each}
 							</Select.Group>
 						  </Select.Content>
+						  {#if form?.issues?.tableNumber}
+							<p class="text-sm text-destructive mt-1">{form.issues.tableNumber[0]}</p>
+						  {/if}
 						</Select.Root>
 					</div>
 				</div>
