@@ -24,7 +24,7 @@
 			<a href={homeUrl} aria-label="Back to homepage">
 				<img src="/logo.svg" alt="Logo" class="w-24 h-24 rounded-full" />
 			</a>
-			<a href={homeUrl} class="text-4xl font-['Great_Vibes']">Tawa & Kettles Caffe</a>
+			<a href={homeUrl} class="text-4xl font-['Great_Vibes']">Tawa & Kettles Cafe</a>
 		</div>
 		{#if data.user}
 			<div class="flex items-center gap-4 text-primary-foreground">
