@@ -23,7 +23,7 @@
 	};
 </script>
 
-<Sidebar.Root class="!absolute !h-full">
+<Sidebar.Root class="sticky top-0 h-screen">
 	<Sidebar.Content>
 		<Sidebar.Group>
 			<Sidebar.GroupLabel>Menu</Sidebar.GroupLabel>
@@ -35,9 +35,9 @@
 								<Sidebar.MenuItem>
 									<Collapsible.Trigger class="w-full">
 										<Sidebar.MenuButton
-											class={isParentActive(item)
+											class="py-2 text-base md:py-1 md:text-sm {isParentActive(item)
 												? 'bg-primary text-primary-foreground hover:bg-primary [&>div]:hidden'
-												: '[&>div]:hidden'}
+												: '[&>div]:hidden'}"
 										>
 											{#snippet child({ props })}
 												<div {...props}>
@@ -54,7 +54,7 @@
 								<Collapsible.Content>
 									<Sidebar.Menu>
 										{#each item.children as subItem (subItem.title)}
-											<a href={subItem.url} class="block pl-10 py-1.5 text-sm">
+											<a href={subItem.url} class="block pl-10 py-2 text-base md:py-1.5 md:text-sm">
 												<span
 													class="rounded-md px-2 py-1"
 													class:bg-primary={$page.url.pathname + $page.url.search ===
@@ -76,9 +76,9 @@
 						{:else}
 							<Sidebar.MenuItem>
 								<Sidebar.MenuButton
-									class={item.url && $page.url.pathname.startsWith(item.url)
+									class="py-2 text-base md:py-1 md:text-sm {item.url && $page.url.pathname.startsWith(item.url)
 										? 'bg-primary text-primary-foreground hover:bg-primary'
-										: ''}
+										: ''}"
 								>
 									{#snippet child({ props })}
 										<a href={item.url} {...props}>

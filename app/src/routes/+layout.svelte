@@ -21,8 +21,8 @@
 
 <!-- Single flex container for the entire app -->
 <!-- The main app view, which will be hidden during printing. -->
-<div class="flex flex-col h-screen w-screen print:hidden">
-	<!-- Header - fixed height -->
+<div class="h-screen w-screen overflow-y-auto print:hidden">
+	<!-- Header - now part of the scrollable content -->
 	<header class="flex-shrink-0 p-4 bg-gradient-to-r from-primary/20 to-primary/40 border-b flex justify-between items-center z-50">
 		<div class="flex items-center gap-6">
 			<a href={homeUrl} aria-label="Back to homepage">
@@ -42,30 +42,28 @@
 		{/if}
 	</header>
 
-	<!-- Main content area - takes remaining height -->
-	<div class="flex-1 flex min-h-0 relative">
+	<!-- Main content area -->
+	<div class="flex relative">
 		{#if isLoginPage}
 			<!-- Login page without sidebar -->
-			<main class="flex-1 p-6 overflow-auto">
+			<main class="flex-1 p-6">
 				{@render children?.()}
 			</main>
 		{:else}
 			<!-- Regular pages with sidebar -->
 			<Sidebar.Provider>
 				<!-- Sidebar -->
-				<div class="relative z-40">
-					<AppSidebar user={data.user} />
-				</div>
+				<AppSidebar user={data.user} />
 				
 				<!-- Main content - takes remaining width -->
 				<div class="flex-1 flex flex-col min-w-0 relative z-10">
 					<!-- Sidebar trigger -->
-					<div class="p-4 border-b">
+					<div class="p-4 border-b sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-20">
 						<Sidebar.Trigger />
 					</div>
 					
 					<!-- Page content - scrollable -->
-					<main class="flex-1 p-6 overflow-auto">
+					<main class="flex-1 p-6">
 						{@render children?.()}
 					</main>
 				</div>
